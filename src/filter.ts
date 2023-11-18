@@ -3,6 +3,10 @@
  */
 export type QueryFilterPredicate = (el: Element) => boolean;
 
+export type QueryFilterPredicateAsync = (el: Element) => Promise<boolean>;
+
+export type AnyFilter = QueryFilter | QueryFilterPredicate;
+
 /**
  * Represent the operator to apply to a series of predicates, logical AND (intersection) or OR (union)
  */
@@ -26,7 +30,8 @@ export class QueryFilterImpl implements QueryFilter {
     constructor(
         private _chainOp: QueryFilterChainOperator = QueryFilterChainOperator.Intersection,
         private _negated: boolean = false,
-        private _filters: (QueryFilter | QueryFilterPredicate)[] = []
+        private _filters: AnyFilter[] = [],
+        private _async: boolean = false
     ) {}
 
     public get chainOp(): QueryFilterChainOperator {
@@ -35,6 +40,10 @@ export class QueryFilterImpl implements QueryFilter {
 
     public get negated(): boolean {
         return this._negated;
+    }
+
+    public get async(): boolean {
+        return this._async;
     }
 
     public get filters(): (QueryFilter | QueryFilterPredicate)[] {
@@ -73,16 +82,79 @@ export const filter = (predicate: QueryFilterPredicate): QueryFilter => {
     return new QueryFilterImpl(QueryFilterChainOperator.Intersection, false, [predicate]);
 }
 
-export const and = (...predicates: (QueryFilter | QueryFilterPredicate)[]): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, false, predicates);
+/**
+ * Constructs a filter whose result is the intersection of the results of a set of `filters` (AND operatar)
+ * @param filters - the filters to intersect
+ * @returns - The built filter
+ *
+ * @example
+ *  
+ * Select all `div` and `a` that have `foo` AND `bar` as classes
+ * 
+ * ```typescript
+ * select('div', 'a')
+ *   .from(document)
+ *   .where(
+ *     and(
+ *       (el) => el.classList.contains('foo'),
+ *       (el) => el.classList.contains('bar')
+ *     )
+ *   )
+ * ```
+ */
+export const and = (...filters: AnyFilter[]): QueryFilter => {
+    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, false, filters);
 }
 
-export const or = (...predicates: (QueryFilter | QueryFilterPredicate)[]): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Union, false, predicates);
+/**
+ * Constructs a filter whose result is the union of the results of a set of `filters` (OR operatar)
+ * @param filters - the filters to intersect
+ * @returns - The built filter
+ * 
+ * @example
+ * 
+ * Select all `div` and `a` that have `foo` or `bar` as classes
+ * 
+ * ```typescript
+ * select('div', 'a')
+ *   .from(document)
+ *   .where(
+ *     or(
+ *       (el) => el.classList.contains('foo'),
+ *       (el) => el.classList.contains('bar')
+ *     )
+ *   )
+ * ```
+ */
+export const or = (...filters: AnyFilter[]): QueryFilter => {
+    return new QueryFilterImpl(QueryFilterChainOperator.Union, false, filters);
 }
 
-export const not = (predicate: QueryFilter | QueryFilterPredicate): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, true, [predicate]);
+/**
+ * Constructs a filter whose result is the negation of the result of another `filter` (NOT operatar)
+ * @param filter - the filter to negate
+ * @returns - The built filter
+ * 
+ * @example
+ *  
+ * Select all `div` and `a` that have `foo` but does NOT have `bar` as classes
+ * 
+ * ```typescript
+ * select('div', 'a')
+ *   .from(document)
+ *   .where(
+ *     and(
+ *       (el) => el.classList.contains('foo'),
+ *       not((el) => el.classList.contains('bar'))
+ *     )
+ *   )
+ * ```
+ */
+export const not = (filter: AnyFilter): QueryFilter => {
+    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, true, [filter]);
 }
 
+/**
+ * The identity filter. Basically a filter that always evaluates to `ŧrue`.
+ */
 export const identity: QueryFilter = filter(() => true);
