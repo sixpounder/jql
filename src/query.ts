@@ -1,4 +1,13 @@
-import { QueryFilter, QueryFilterImpl, QueryFilterPredicate, and, filter, identity, or } from './filter';
+import {
+    QueryFilterProtocol,
+    QueryFilterPredicate,
+    and,
+    filter,
+    identity,
+    or,
+    isQueryFilterPredicate,
+    AnyFilter
+} from './filter';
 import { isNull } from './utils';
 
 export enum FilterChainType {
@@ -13,13 +22,13 @@ interface Executable<T> {
     /**
      * Executes the query and return a result
      */
-    exec(): T
+    run(): Promise<T>
 }
 
 class Query implements Executable<Element[]> {
     private rootNode: ParentNode | null = null;
     private projectionSpec: string[] | null = null;
-    private filter: QueryFilter = identity;
+    private filter: QueryFilterProtocol = identity;
     private resultsLimit = 0;
     private resultsOffset = 0;
 
@@ -45,8 +54,8 @@ class Query implements Executable<Element[]> {
         return this;
     }
 
-    public where(...conditions: (QueryFilterPredicate | QueryFilter)[]): QueryFilterBuilder {
-        if (conditions.length === 1 && QueryFilterImpl.isQueryFilterPredicate(conditions[0])) {
+    public where(...conditions: AnyFilter[]): QueryFilterBuilder {
+        if (conditions.length === 1 && isQueryFilterPredicate(conditions[0])) {
             this.filter = filter(conditions[0])
         } else {
             this.filter = and(...conditions);
@@ -55,8 +64,8 @@ class Query implements Executable<Element[]> {
         return new QueryFilterBuilder(this);
     }
 
-    public or(...conditions: (QueryFilterPredicate | QueryFilter)[]): QueryFilterBuilder {
-        if (conditions.length === 1 && QueryFilterImpl.isQueryFilterPredicate(conditions[0])) {
+    public or(...conditions: AnyFilter[]): QueryFilterBuilder {
+        if (conditions.length === 1 && isQueryFilterPredicate(conditions[0])) {
             this.filter = or(filter(conditions[0]))
         } else {
             this.filter = or(...conditions);
@@ -75,7 +84,7 @@ class Query implements Executable<Element[]> {
         return this;
     }
 
-    public exec(): Element[] {
+    public async run(): Promise<Element[]> {
         if (isNull(this.rootNode)) {
             throw new Error('Cannot run a query without a source. Use .from(...) to set one.');
         }
@@ -89,7 +98,7 @@ class Query implements Executable<Element[]> {
         let returnedNodes: Element[] = [];
 
         for (const node of this.rootNode.querySelectorAll(this.projectionSpec.join(', ')).values()) {
-            if (this.filter.apply(node)) {
+            if (await this.filter.apply(node)) {
                 returnedNodes.push(node);
             }
         }
@@ -112,13 +121,13 @@ class Query implements Executable<Element[]> {
 export class QueryFilterBuilder implements Executable<Element[]> {
     constructor(private parent: Query) {}
 
-    public and(filter: QueryFilterPredicate | QueryFilter): QueryFilterBuilder {
+    public and(filter: QueryFilterPredicate | QueryFilterProtocol): QueryFilterBuilder {
         this.parent.where(filter);
         return this;
     }
 
-    public exec(): Element[] {
-        return this.parent.exec();
+    public async run(): Promise<Element[]> {
+        return this.parent.run();
     }
 }
 

@@ -1,3 +1,5 @@
+import { isPromise, promisify } from './inspection';
+
 /**
  * A predicate applied to an `Element`
  */
@@ -5,7 +7,11 @@ export type QueryFilterPredicate = (el: Element) => boolean;
 
 export type QueryFilterPredicateAsync = (el: Element) => Promise<boolean>;
 
-export type AnyFilter = QueryFilter | QueryFilterPredicate;
+export type AnyFilter = QueryFilterProtocol | QueryFilterPredicate | QueryFilterPredicateAsync;
+
+export type AnyAsyncFilter = QueryFilterProtocol | QueryFilterPredicateAsync;
+
+export type Filterable = NonNullable<object> | Element;
 
 /**
  * Represent the operator to apply to a series of predicates, logical AND (intersection) or OR (union)
@@ -18,21 +24,28 @@ export enum QueryFilterChainOperator {
 /**
  * Implemented by types who wants to apply some kind of filter to an `Element`
  */
-export interface QueryFilter {
-    apply(el: Element): boolean
+export interface QueryFilterProtocol {
+    apply(el: Filterable): Promise<boolean>
 }
 
 /**
  * Basic implementor of `QueryFilter`. Do not instantiate this class directly, use the appropriate
  * functions provided: `and`, `or` and `not`
  */
-export class QueryFilterImpl implements QueryFilter {
+export class QueryFilter implements QueryFilterProtocol {
     constructor(
         private _chainOp: QueryFilterChainOperator = QueryFilterChainOperator.Intersection,
         private _negated: boolean = false,
-        private _filters: AnyFilter[] = [],
-        private _async: boolean = false
-    ) {}
+        private _filters: AnyAsyncFilter[] = [],
+    ) {
+        this._filters = this._filters.map(maybeAsyncFilter => {
+            if (isQueryFilterPredicate(maybeAsyncFilter)) {
+                return promisify(maybeAsyncFilter);
+            } else {
+                return maybeAsyncFilter;
+            }
+        })
+    }
 
     public get chainOp(): QueryFilterChainOperator {
         return this._chainOp;
@@ -42,44 +55,60 @@ export class QueryFilterImpl implements QueryFilter {
         return this._negated;
     }
 
-    public get async(): boolean {
-        return this._async;
-    }
-
-    public get filters(): (QueryFilter | QueryFilterPredicate)[] {
+    public get filters(): AnyAsyncFilter[] {
         return this._filters;
     }
 
-    apply(el: Element): boolean {
+    async apply(el: Element): Promise<boolean> {
         let provisional;
-        switch (this.chainOp) {
-        default:
-        case QueryFilterChainOperator.Intersection:
-            provisional = this.filters.reduce((accumulator, fn) => {
-                return accumulator && (QueryFilterImpl.isQueryFilterPredicate(fn) ? fn(el) : fn.apply(el));
-            }, true);
-            break;
-        case QueryFilterChainOperator.Union:
-            provisional = this.filters.reduce((accumulator, fn) => {
-                return accumulator || (QueryFilterImpl.isQueryFilterPredicate(fn) ? fn(el) : fn.apply(el));
-            }, false);
-            break;
+        if (this.chainOp === QueryFilterChainOperator.Union) {
+            provisional = false;
+            for (let i = 0; i < this.filters.length; i++) {
+                const fn = this.filters[i];
+                const res = await callFilter(fn, el);
+                provisional = provisional || res;
+            }
+        } else {
+            provisional = true;
+            for (let i = 0; i < this.filters.length; i++) {
+                const fn = this.filters[i];
+                const res = await callFilter(fn, el);
+                provisional = provisional && res;
+            }
         }
 
         return this.negated ? !provisional : provisional;
     }
-
-    static isQueryFilter(value: any): value is QueryFilter {
-        return typeof value !== 'function';
-    }
-    
-    static isQueryFilterPredicate(value: any): value is QueryFilterPredicate {
-        return typeof value === 'function';
-    }
 }
 
-export const filter = (predicate: QueryFilterPredicate): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, false, [predicate]);
+const callFilter = async(fn: AnyFilter, el: Element): Promise<boolean> => {
+
+    return isQueryFilterPredicate(fn)
+        ? promisify<boolean>(fn)(el)
+        : isQueryFilter(fn)
+            ? fn.apply(el)
+            : fn(el);
+}
+
+export const isQueryFilter = (value: any): value is QueryFilterProtocol => {
+    return value instanceof QueryFilter;
+}
+
+export const isQueryFilterPredicate = (value: any): value is QueryFilterPredicate => {
+    return !isPromise(value) && typeof value === 'function';
+}
+
+export const isQueryFilterPredicateAsync = (value: any): value is QueryFilterPredicateAsync => {
+    return isPromise(value);
+}
+
+/**
+ * Creates a single filter from a predicate
+ * @param predicate 
+ * @returns 
+ */
+export const filter = (predicate: QueryFilterPredicate): QueryFilterProtocol => {
+    return new QueryFilter(QueryFilterChainOperator.Intersection, false, [predicate]);
 }
 
 /**
@@ -102,8 +131,8 @@ export const filter = (predicate: QueryFilterPredicate): QueryFilter => {
  *   )
  * ```
  */
-export const and = (...filters: AnyFilter[]): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, false, filters);
+export const and = (...filters: AnyFilter[]): QueryFilterProtocol => {
+    return new QueryFilter(QueryFilterChainOperator.Intersection, false, filters);
 }
 
 /**
@@ -126,8 +155,8 @@ export const and = (...filters: AnyFilter[]): QueryFilter => {
  *   )
  * ```
  */
-export const or = (...filters: AnyFilter[]): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Union, false, filters);
+export const or = (...filters: AnyFilter[]): QueryFilterProtocol => {
+    return new QueryFilter(QueryFilterChainOperator.Union, false, filters);
 }
 
 /**
@@ -150,11 +179,11 @@ export const or = (...filters: AnyFilter[]): QueryFilter => {
  *   )
  * ```
  */
-export const not = (filter: AnyFilter): QueryFilter => {
-    return new QueryFilterImpl(QueryFilterChainOperator.Intersection, true, [filter]);
+export const not = (filter: AnyFilter): QueryFilterProtocol => {
+    return new QueryFilter(QueryFilterChainOperator.Intersection, true, [filter]);
 }
 
 /**
  * The identity filter. Basically a filter that always evaluates to `ŧrue`.
  */
-export const identity: QueryFilter = filter(() => true);
+export const identity: QueryFilterProtocol = filter(() => true);

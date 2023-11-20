@@ -2,12 +2,19 @@
   "name": "@dpw/jql",
   "version": "1.0.0",
   "description": "A sql-like querying interface for the dom",
-  "main": "index.js",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "main": "dist/lib/jql.js",
+  "module": "dist/jql.mjs",
+  "types": "dist/lib/jql.d.ts",
   "scripts": {
-    "build": "esbuild ./src/lib.ts --bundle --minify --sourcemap --outfile=dist/esm/lib.js",
+    "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs",
+    "build:mjs": "esbuild ./src/lib.ts --bundle --format=esm --outfile=dist/jql.mjs",
+    "build:cjs": "esbuild ./src/lib.ts --bundle --format=cjs --outfile=dist/jql.cjs",
     "test": "jest"
   },
-  "author": "",
+  "author": "Andrea Coronese <sixpounder@protonmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^29.5.8",
@@ -17,7 +24,9 @@
     "esbuild": "^0.19.5",
     "eslint": "^8.53.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "jsdom": "^22.1.0",
+    "rimraf": "^5.0.5",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
   }
