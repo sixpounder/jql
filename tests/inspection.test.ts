@@ -1,29 +1,29 @@
 /**
  * @jest-environment jsdom
  */
-import { isElement, isPromise, promisify } from '../src/inspection';
+import { isElement, isPromise, promisify } from "../src/inspection";
 
-describe('Testing inspection library', () => {
-    test('isElement', () => {
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('wolf');
+describe("Testing inspection library", () => {
+    test("isElement", () => {
+        const someDiv = document.createElement("div");
+        someDiv.classList.add("wolf");
         document.body.appendChild(someDiv);
 
         expect(isElement(someDiv)).toBe(true)
         expect(isElement({})).toBe(false)
-        expect(isElement('Wassaaaap')).toBe(false)
+        expect(isElement("Wassaaaap")).toBe(false)
     })
 
-    test('isPromise', () => {
+    test("isPromise", () => {
         expect(isPromise(console.log)).toBe(false);
-        expect(isPromise(Promise.resolve('inigo montoya'))).toBe(true);
+        expect(isPromise(Promise.resolve("inigo montoya"))).toBe(true);
     })
 
-    test('promisify', () => {
-        const notAPromise = () => 'inigo montoya'
+    test("promisify", () => {
+        const notAPromise = () => "inigo montoya"
         expect(isPromise(notAPromise)).toBe(false);
 
         const promisified = promisify(notAPromise)
-        expect(isPromise(promisified('inigo montoya'))).toBe(true);
+        expect(isPromise(promisified("inigo montoya"))).toBe(true);
     })
 })

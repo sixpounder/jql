@@ -1,3 +1,5 @@
+import { DatasourceRepository } from "./datasource";
+import { AnyRawDataSource, QueryDataSource } from "./datasource/prelude";
 import {
     QueryFilterProtocol,
     QueryFilterPredicate,
@@ -5,10 +7,11 @@ import {
     filter,
     identity,
     or,
-    isQueryFilterPredicate,
+    isPredicate,
     AnyFilter
-} from './filter';
-import { isNull } from './utils';
+} from "./filter";
+import { Comparator, SortDirection, SortRule, sort } from "./sort";
+import { isNull } from "./utils";
 
 export enum FilterChainType {
     Intersection,
@@ -22,87 +25,128 @@ interface Executable<T> {
     /**
      * Executes the query and return a result
      */
-    run(): Promise<T>
+    run(): Promise<T[]>
 }
 
-class Query implements Executable<Element[]> {
-    private rootNode: ParentNode | null = null;
+interface QueryResult { [K: string]: Record<string | number | symbol, any> }
+
+class Query<O = QueryResult> implements Executable<O> {
+    private datasource: DatasourceRepository = new DatasourceRepository();
     private projectionSpec: string[] | null = null;
     private filter: QueryFilterProtocol = identity;
     private resultsLimit = 0;
     private resultsOffset = 0;
+    private sortRules: SortRule[] = [];
 
-    constructor() {}
+    constructor(...projectionSpec: string[]) {
+        this.projectionSpec = projectionSpec;
+    }
 
     /**
-     * Sets the projection for this query
-     * @param projection - the projected items
-     * @returns 
+     * Adds a datasource for this query. This can be any javascript object, array or DOM node.
+     * @param rootNode - The node for this query data source
+     * @returns - the query with the data source added
      */
-    public select(...projection: string[]): Query {
-        this.projectionSpec = projection;
+    public from(source: AnyRawDataSource): Query<O> {
+        this.datasource.add(source);
         return this;
     }
 
     /**
-     * Defines the source for the query. This can be any javascript object.
-     * @param rootNode - The root node for this query data source
-     * @returns - the query with the data source set
+     * Registers filters for this query
+     * @param conditions - the filters to append to the filter list
+     * @returns - The query with the filters appended
      */
-    public from(rootNode: ParentNode): Query {
-        this.rootNode = rootNode;
-        return this;
-    }
-
-    public where(...conditions: AnyFilter[]): QueryFilterBuilder {
-        if (conditions.length === 1 && isQueryFilterPredicate(conditions[0])) {
+    public where(...conditions: AnyFilter[]): FilterableQuery<O> {
+        if (conditions.length === 1 && isPredicate(conditions[0])) {
             this.filter = filter(conditions[0])
         } else {
             this.filter = and(...conditions);
         }
 
-        return new QueryFilterBuilder(this);
+        return new FilterableQuery(this);
     }
 
-    public or(...conditions: AnyFilter[]): QueryFilterBuilder {
-        if (conditions.length === 1 && isQueryFilterPredicate(conditions[0])) {
+    public or(...conditions: AnyFilter[]): FilterableQuery<O> {
+        if (conditions.length === 1 && isPredicate(conditions[0])) {
             this.filter = or(filter(conditions[0]))
         } else {
             this.filter = or(...conditions);
         }
 
-        return new QueryFilterBuilder(this);
+        return new FilterableQuery(this);
     }
 
+    /**
+     * Sets the limit of the result set size to `n`. `0` means no limit.
+     * @param n - the number of entries to limit to
+     * @returns - the query with a limit set
+     */
     public limit(n: number) {
         this.resultsLimit = n;
         return this;
     }
 
+    /**
+     * Sets the offset of the result set to `n`.
+     * @param n - the offset index
+     * @returns - the query with an offset set
+     */
     public offset(n: number) {
         this.resultsOffset = n;
         return this;
     }
 
-    public async run(): Promise<Element[]> {
-        if (isNull(this.rootNode)) {
-            throw new Error('Cannot run a query without a source. Use .from(...) to set one.');
+    /**
+     * Appends sort rules for this query
+     * @param comparator - The comparator function. See `Comparator`.
+     * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
+     */
+    public sort(comparator: Comparator, direction?: SortDirection): void {
+        this.sortRules.push({
+            comparator,
+            direction: direction ?? SortDirection.Ascending
+        })
+    }
+
+    /**
+     * Executes the query
+     * @returns - The result set
+     */
+    public async run(): Promise<O[]> {
+        if (isNull(this.datasource) || this.datasource.isEmpty()) {
+            throw new Error("Cannot run a query without a source. Use .from(...) to set one.");
         }
 
         if (isNull(this.projectionSpec)) {
             throw new Error(
-                'Cannot run a query without a projection. Use .select(...) or the select() builder function to set one.'
+                "Cannot run a query without a projection. Use .select(...) or the select() builder function to set one."
             );
         }
 
-        let returnedNodes: Element[] = [];
+        let returnedNodes: O[] = [];
+        const datasources: QueryDataSource<any>[] = this.datasource.merge();
 
-        for (const node of this.rootNode.querySelectorAll(this.projectionSpec.join(', ')).values()) {
-            if (await this.filter.apply(node)) {
-                returnedNodes.push(node);
+        // Extraction
+        for (const source of datasources) {
+            for (const node of source.entries(null)[0]) {
+                if (await this.filter.apply(node)) {
+    
+                    // TODO: apply projection here
+                    returnedNodes.push(node);
+                }
             }
         }
 
+        // Sorting
+        if (this.sortRules.length) {
+            for (let i = 0; i < this.sortRules.length; i++) {
+                const rule = this.sortRules[i];
+                sort(returnedNodes, rule);
+            }
+        }
+
+        // Limit / offset
         if (this.resultsLimit !== 0 || this.resultsOffset !== 0) {
             returnedNodes = returnedNodes.slice(
                 this.resultsOffset,
@@ -118,15 +162,51 @@ class Query implements Executable<Element[]> {
     }
 }
 
-export class QueryFilterBuilder implements Executable<Element[]> {
-    constructor(private parent: Query) {}
+export class FilterableQuery<O = QueryResult> implements Executable<O> {
+    constructor(private parent: Query<O>) {}
 
-    public and(filter: QueryFilterPredicate | QueryFilterProtocol): QueryFilterBuilder {
+    public and(filter: QueryFilterPredicate | QueryFilterProtocol): FilterableQuery<O> {
         this.parent.where(filter);
         return this;
     }
 
-    public async run(): Promise<Element[]> {
+    public or(...conditions: AnyFilter[]): FilterableQuery<O> {
+        return this.parent.or(...conditions);
+    }
+
+    /**
+     * Sets the limit of the result set size to `n`. `0` means no limit.
+     * @param n - the number of entries to limit to
+     * @returns - the query with a limit set
+     */
+    public limit(n: number) {
+        return this.parent.limit(n);
+    }
+
+    /**
+     * Sets the offset of the result set to `n`.
+     * @param n - the offset index
+     * @returns - the query with an offset set
+     */
+    public offset(n: number) {
+        return this.parent.offset(n);
+    }
+
+    /**
+     * Appends sort rules for this query
+     * @param comparator - The comparator function. See `Comparator`.
+     * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
+     */
+    public sort(comparator: Comparator): void;
+    public sort(comparator: Comparator, direction?: SortDirection): void {
+        return this.parent.sort(comparator, direction);
+    }
+
+    /**
+     * Executes the query
+     * @returns - The result set
+     */
+    public async run(): Promise<O[]> {
         return this.parent.run();
     }
 }
@@ -139,6 +219,7 @@ export class QueryFilterBuilder implements Executable<Element[]> {
  *               available to that API if you know how to.
  * @returns - A `Query` to further customize
  */
-export const select = (...what: string[]) => {
-    return new Query().select(...what);
+export const select = (...projections: string[]) => {
+    const query: Query = new Query(...projections);
+    return query;
 }

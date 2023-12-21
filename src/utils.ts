@@ -16,3 +16,7 @@
 export const isNull = <T>(value: T | null): value is null => {
     return value === null;
 }
+
+export const get = <K extends string | number | symbol, T>(value: Record<K, T>, prop: K): T | undefined => {
+    return value[prop];
+}

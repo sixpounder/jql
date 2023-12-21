@@ -1,105 +1,82 @@
-import { and, not, or } from '../src/filter';
-import { select } from '../src/query';
-import { JSDOM } from 'jsdom';
-import { sleep } from './utils';
+/**
+ * @jest-environment jsdom
+ */
 
-function getDOM() {
-    return new JSDOM('', {
-        url: 'https://test.me/',
-        referrer: 'https://test.me/',
-        contentType: 'text/html',
-        includeNodeLocations: true,
-        storageQuota: 10000000
-    });
-}
+import { and, not, or } from "../src/filter";
+import { select } from "../src/query";
+import { hasClass } from "../src/filter/builtin";
+import { sleep } from "./utils";
 
-describe('Testing JSQuery', () => {
-    test('Identity filter', async() => {
-        
-        const { document } = getDOM().window;
+const someDiv = document.createElement("div");
+someDiv.classList.add("sheep");
+document.body.appendChild(someDiv);
 
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('wolf');
-        document.body.appendChild(someDiv);
+const someOtherDiv = document.createElement("div");
+someOtherDiv.classList.add("leet");
+document.body.appendChild(someOtherDiv);
 
-        const queryResult = await select('div')
+describe("Testing JSQuery", () => {
+    test("DOM select * from *", async () => {
+
+        const queryResult = await select("*")
             .from(document)
             .run();
-        
+
         expect(queryResult).toBeInstanceOf(Array);
-        expect(queryResult).toHaveLength(1);
+        expect(queryResult).toHaveLength(5);
 
         const queryResult2 =
-        await select('div')
-            .from(document)
-            .where(node => node.classList.contains('sheep'))
-            .run();
-        
-        expect(queryResult2).toBeInstanceOf(Array);
-        expect(queryResult2).toHaveLength(0);
-    });
-
-    test('Single condition queries by classList', async() => {
-        
-        const { document } = getDOM().window;
-
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('sheep');
-        document.body.appendChild(someDiv);
-
-        const queryResult = await select('div')
-            .from(document)
-            .where(node => {
-                return node.classList.contains('wolf');
-            })
-            .run();
-        
-        expect(queryResult).toBeInstanceOf(Array);
-        expect(queryResult).toHaveLength(0);
-
-        const queryResult2 = await select('div')
-            .from(document)
-            .where(node => node.classList.contains('sheep'))
+        await select("*")
+            .from("document.div")
+            .where(hasClass("sheep"))
             .run();
         
         expect(queryResult2).toBeInstanceOf(Array);
         expect(queryResult2).toHaveLength(1);
     });
 
-    test('Single async condition', async() => {
+    test("Single condition queries by classList", async () => {
+
+        const queryResult = await select("div")
+            .from(document)
+            .where(node => {
+                return node.classList.contains("wolf");
+            })
+            .run();
         
-        const { document } = getDOM().window;
+        expect(queryResult).toBeInstanceOf(Array);
+        expect(queryResult).toHaveLength(0);
 
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('sheep');
-        document.body.appendChild(someDiv);
+        const queryResult2 = await select("div")
+            .from(document)
+            .where(node => node.classList.contains("sheep"))
+            .run();
+        
+        expect(queryResult2).toBeInstanceOf(Array);
+        expect(queryResult2).toHaveLength(1);
+    });
 
-        const queryResult = await select('div')
+    test("Single async condition", async () => {
+        const queryResult = await select("div")
             .from(document)
             .where(async node => {
-                await sleep(2000);
-                return node.classList.contains('sheep');
+                await sleep(100);
+                return node.classList.contains("sheep");
             })
             .run();
         
         expect(queryResult).toBeInstanceOf(Array);
         expect(queryResult).toHaveLength(1);
-    });
+    }, 10000);
 
-    test('Multiple condition queries (intersection)', async() => {
-        
-        const { document } = getDOM().window;
+    test("Multiple condition queries (intersection)", async () => {
 
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('sheep');
-        document.body.appendChild(someDiv);
-
-        const queryResult = await select('div')
+        const queryResult = await select("div")
             .from(document)
             .where(
                 and(
-                    not(node => node.classList.contains('wolf')),
-                    node => node.classList.contains('sheep')
+                    not(hasClass("wolf")),
+                    hasClass("sheep")
                 )
             )
             .run();
@@ -108,25 +85,15 @@ describe('Testing JSQuery', () => {
         expect(queryResult).toHaveLength(1);
     });
 
-    test('Multiple condition queries (union)', async() => {
-        
-        const { document } = getDOM().window;
+    test("Multiple condition queries (union)", async () => {
 
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('sheep');
-        document.body.appendChild(someDiv);
-
-        const someOtherDiv = document.createElement('div');
-        someOtherDiv.classList.add('leet');
-        document.body.appendChild(someOtherDiv);
-
-        const queryResult = await select('div')
+        const queryResult = await select("div")
             .from(document)
             .where(
-                not(node => node.classList.contains('wolf')),
+                not(node => node.classList.contains("wolf")),
                 or(
-                    node => node.classList.contains('leet'),
-                    node => node.classList.contains('sheep')
+                    node => node.classList.contains("leet"),
+                    node => node.classList.contains("sheep")
                 )
             )
             .run();
@@ -135,50 +102,28 @@ describe('Testing JSQuery', () => {
         expect(queryResult).toHaveLength(2);
     });
 
-    test('Multiple projection', async() => {
-        
-        const { document } = getDOM().window;
-
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('sheep');
-        document.body.appendChild(someDiv);
-
-        const someOtherDiv = document.createElement('a');
-        someOtherDiv.classList.add('leet');
-        document.body.appendChild(someOtherDiv);
-
-        const queryResult = await select('div, a')
+    test("Multiple projection", async () => {
+        const queryResult = await select("div, a")
             .from(document)
             .run();
         
         expect(queryResult).toBeInstanceOf(Array);
-        expect(queryResult).toHaveLength(2);
-        expect(queryResult[0].tagName).toBe('DIV');
-        expect(queryResult[1].tagName).toBe('A');
+        expect(queryResult).toHaveLength(5);
+        expect(queryResult[0].tagName).toBe("HTML");
+        expect(queryResult[1].tagName).toBe("HEAD");
     });
 
-    test('Limit / Offset', async() => {
-        
-        const { document } = getDOM().window;
-
-        const someDiv = document.createElement('div');
-        someDiv.classList.add('sheep');
-        document.body.appendChild(someDiv);
-
-        const someOtherDiv = document.createElement('a');
-        someOtherDiv.classList.add('leet');
-        document.body.appendChild(someOtherDiv);
-
-        const queryResult = await select('div, a')
+    test("Limit / Offset", async () => {
+        const queryResult = await select("div, a")
             .from(document)
             .limit(1)
             .run();
         
         expect(queryResult).toBeInstanceOf(Array);
         expect(queryResult).toHaveLength(1);
-        expect(queryResult[0].tagName).toBe('DIV');
+        expect(queryResult[0].tagName).toBe("HTML");
 
-        const queryResult2 = await select('div, a')
+        const queryResult2 = await select("div, a")
             .from(document)
             .limit(1)
             .offset(1)
@@ -186,9 +131,9 @@ describe('Testing JSQuery', () => {
         
         expect(queryResult2).toBeInstanceOf(Array);
         expect(queryResult2).toHaveLength(1);
-        expect(queryResult2[0].tagName).toBe('A');
+        expect(queryResult2[0].tagName).toBe("HEAD");
 
-        const queryResult3 = await select('div, a')
+        const queryResult3 = await select("div, a")
             .from(document)
             .offset(23) // Way out of index
             .run();

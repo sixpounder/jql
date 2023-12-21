@@ -1,0 +1,18 @@
+{
+  "name": "@jql/jql",
+  "version": "1.0.0",
+  "description": "A sql-like querying interface for the dom",
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/jql.d.ts",
+      "main": "./lib/jql.js",
+      "module": "./jql.mjs",
+      "default": "./jql.mjs"
+    }
+  },
+  "author": "Andrea Coronese <sixpounder@protonmail.com>",
+  "license": "MIT"
+}

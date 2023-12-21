@@ -1,4 +1,5 @@
-import { isPromise, promisify } from './inspection';
+import { AnyDataSource } from "../datasource/prelude";
+import { isPromise, promisify } from "../inspection";
 
 /**
  * A predicate applied to an `Element`
@@ -10,8 +11,6 @@ export type QueryFilterPredicateAsync = (el: Element) => Promise<boolean>;
 export type AnyFilter = QueryFilterProtocol | QueryFilterPredicate | QueryFilterPredicateAsync;
 
 export type AnyAsyncFilter = QueryFilterProtocol | QueryFilterPredicateAsync;
-
-export type Filterable = NonNullable<object> | Element;
 
 /**
  * Represent the operator to apply to a series of predicates, logical AND (intersection) or OR (union)
@@ -25,11 +24,11 @@ export enum QueryFilterChainOperator {
  * Implemented by types who wants to apply some kind of filter to an `Element`
  */
 export interface QueryFilterProtocol {
-    apply(el: Filterable): Promise<boolean>
+    apply(el: AnyDataSource): Promise<boolean>
 }
 
 /**
- * Basic implementor of `QueryFilter`. Do not instantiate this class directly, use the appropriate
+ * Basic implementor of `QueryFilterProtocol`. Do not instantiate this class directly, use the appropriate
  * functions provided: `and`, `or` and `not`
  */
 export class QueryFilter implements QueryFilterProtocol {
@@ -39,7 +38,7 @@ export class QueryFilter implements QueryFilterProtocol {
         private _filters: AnyAsyncFilter[] = [],
     ) {
         this._filters = this._filters.map(maybeAsyncFilter => {
-            if (isQueryFilterPredicate(maybeAsyncFilter)) {
+            if (isPredicate(maybeAsyncFilter)) {
                 return promisify(maybeAsyncFilter);
             } else {
                 return maybeAsyncFilter;
@@ -59,20 +58,25 @@ export class QueryFilter implements QueryFilterProtocol {
         return this._filters;
     }
 
-    async apply(el: Element): Promise<boolean> {
+    /**
+     * Applies this filter to `element`
+     * @param element - the evaluated element
+     * @returns - A promise of the boolean resolved by this filter
+     */
+    async apply(element: Element): Promise<boolean> {
         let provisional;
         if (this.chainOp === QueryFilterChainOperator.Union) {
             provisional = false;
             for (let i = 0; i < this.filters.length; i++) {
                 const fn = this.filters[i];
-                const res = await callFilter(fn, el);
+                const res = await callFilter(fn, element);
                 provisional = provisional || res;
             }
         } else {
             provisional = true;
             for (let i = 0; i < this.filters.length; i++) {
                 const fn = this.filters[i];
-                const res = await callFilter(fn, el);
+                const res = await callFilter(fn, element);
                 provisional = provisional && res;
             }
         }
@@ -81,24 +85,45 @@ export class QueryFilter implements QueryFilterProtocol {
     }
 }
 
-const callFilter = async(fn: AnyFilter, el: Element): Promise<boolean> => {
+/**
+ * Calls fn asyncrounously, where fn `AnyFilter`
+ * @param fn - the filter to call
+ * @param el - the element of the predicate
+ * @returns - a promise of the boolean resolved by the predicate
+ */
+const callFilter = async (fn: AnyFilter, el: Element): Promise<boolean> => {
 
-    return isQueryFilterPredicate(fn)
+    return isPredicate(fn)
         ? promisify<boolean>(fn)(el)
         : isQueryFilter(fn)
             ? fn.apply(el)
             : fn(el);
 }
 
+/**
+ * Asses if `value` is any object complying with `QueryFilterProtocol`
+ * @param value - the value to inspect
+ * @returns - If value complies with `QueryFilterProtocol`
+ */
 export const isQueryFilter = (value: any): value is QueryFilterProtocol => {
     return value instanceof QueryFilter;
 }
 
-export const isQueryFilterPredicate = (value: any): value is QueryFilterPredicate => {
-    return !isPromise(value) && typeof value === 'function';
+/**
+ * Asses if `value` is a predicate
+ * @param value - the value to inspect
+ * @returns - If value is a predicate
+ */
+export const isPredicate = (value: any): value is QueryFilterPredicate => {
+    return !isPromise(value) && typeof value === "function";
 }
 
-export const isQueryFilterPredicateAsync = (value: any): value is QueryFilterPredicateAsync => {
+/**
+ * Asses if `value` is an asyncronous predicate
+ * @param value - the value to inspect
+ * @returns - If value is an asyncronous predicate
+ */
+export const isPredicateAsync = (value: any): value is QueryFilterPredicateAsync => {
     return isPromise(value);
 }
 
@@ -173,8 +198,8 @@ export const or = (...filters: AnyFilter[]): QueryFilterProtocol => {
  *   .from(document)
  *   .where(
  *     and(
- *       (el) => el.classList.contains('foo'),
- *       not((el) => el.classList.contains('bar'))
+ *       hasClass('foo'),
+ *       not(hasClass('bar'))
  *     )
  *   )
  * ```

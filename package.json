@@ -1,17 +1,24 @@
 {
-  "name": "@dpw/jql",
+  "name": "@jql/jql",
   "version": "1.0.0",
   "description": "A sql-like querying interface for the dom",
   "engines": {
     "node": ">=18.18.0"
   },
-  "main": "dist/lib/jql.js",
-  "module": "dist/jql.mjs",
-  "types": "dist/lib/jql.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/lib/jql.d.ts",
+      "main": "./dist/lib/jql.js",
+      "module": "./dist/jql.mjs",
+      "default": "./dist/jql.mjs"
+    }
+  },
   "scripts": {
-    "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs",
+    "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
     "build:mjs": "esbuild ./src/lib.ts --bundle --format=esm --outfile=dist/jql.mjs",
     "build:cjs": "esbuild ./src/lib.ts --bundle --format=cjs --outfile=dist/jql.cjs",
+    "copy-assets": "cp build/templates/package.json.template dist/package.json && cp README.md dist/README.md",
+    "lint": "eslint --fix .",
     "test": "jest"
   },
   "author": "Andrea Coronese <sixpounder@protonmail.com>",

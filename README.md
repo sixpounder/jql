@@ -4,24 +4,25 @@
 
 ## Features
 
-- No external dependencies
 - Small footprint: no prototype polluting
 - Small size
+- No external dependencies
 - No reason behind it
 
 ## Usage
 
 ```sh
-npm i -S @dpw/jql
+npm i -S @jql/jql
 ```
 
 ```typescript
-const results = await select('div', 'a')
+const results = await select('tagName', 'class')
   .from(document)
   .where(
     and(
-      (el) => el.classList.contains('foo'),
-      not((el) => el.classList.contains('bar'))
+      tagName('div'),
+      hasClass('foo'),
+      not(hasClass('bar'))
     )
   )
   .lmit(10) // Fetch first 10 results
