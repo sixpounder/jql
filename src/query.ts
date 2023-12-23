@@ -1,17 +1,17 @@
 import { DatasourceRepository } from "./datasource";
-import { AnyRawDataSource, QueryDataSource } from "./datasource/prelude";
+import { project } from "./datasource/internals";
+import { AnyObject, AnyRawDataSource, DataSource, QueryResult } from "./datasource/prelude";
 import {
     QueryFilterProtocol,
-    QueryFilterPredicate,
     and,
     filter,
     identity,
-    or,
     isPredicate,
     AnyFilter
 } from "./filter";
+import { filter as projectedObject } from "lodash";
 import { Comparator, SortDirection, SortRule, sort } from "./sort";
-import { isNull } from "./utils";
+import { isNull, uniq } from "lodash";
 
 export enum FilterChainType {
     Intersection,
@@ -28,18 +28,11 @@ interface Executable<T> {
     run(): Promise<T[]>
 }
 
-interface QueryResult { [K: string]: Record<string | number | symbol, any> }
-
-class Query<O = QueryResult> implements Executable<O> {
-    private datasource: DatasourceRepository = new DatasourceRepository();
+class Projection<O = QueryResult> {
     private projectionSpec: string[] | null = null;
-    private filter: QueryFilterProtocol = identity;
-    private resultsLimit = 0;
-    private resultsOffset = 0;
-    private sortRules: SortRule[] = [];
 
     constructor(...projectionSpec: string[]) {
-        this.projectionSpec = projectionSpec;
+        this.projectionSpec = projectedObject(uniq(projectionSpec), (projectionItem) => projectionItem !== "*");
     }
 
     /**
@@ -47,9 +40,28 @@ class Query<O = QueryResult> implements Executable<O> {
      * @param rootNode - The node for this query data source
      * @returns - the query with the data source added
      */
-    public from(source: AnyRawDataSource): Query<O> {
+    public from(source: AnyRawDataSource): FilterableQuery<O> {
+        return new FilterableQuery(this, source);
+    }
+
+    public get projection() {
+        return this.projectionSpec;
+    }
+
+    public describe(): string {
+        return JSON.stringify(this)
+    }
+}
+
+class FilterableQuery<O> implements Executable<O> {
+    private datasource: DatasourceRepository = new DatasourceRepository();
+    private resultsLimit = 0;
+    private resultsOffset = 0;
+    private sortRules: SortRule[] = [];
+    private _filter: QueryFilterProtocol = identity;
+
+    constructor(private parent: Projection<O>, source: AnyRawDataSource) {
         this.datasource.add(source);
-        return this;
     }
 
     /**
@@ -59,22 +71,12 @@ class Query<O = QueryResult> implements Executable<O> {
      */
     public where(...conditions: AnyFilter[]): FilterableQuery<O> {
         if (conditions.length === 1 && isPredicate(conditions[0])) {
-            this.filter = filter(conditions[0])
+            this._filter = filter(conditions[0])
         } else {
-            this.filter = and(...conditions);
+            this._filter = and(...conditions);
         }
 
-        return new FilterableQuery(this);
-    }
-
-    public or(...conditions: AnyFilter[]): FilterableQuery<O> {
-        if (conditions.length === 1 && isPredicate(conditions[0])) {
-            this.filter = or(filter(conditions[0]))
-        } else {
-            this.filter = or(...conditions);
-        }
-
-        return new FilterableQuery(this);
+        return this;
     }
 
     /**
@@ -109,6 +111,10 @@ class Query<O = QueryResult> implements Executable<O> {
         })
     }
 
+    public get filter() {
+        return this._filter;
+    }
+
     /**
      * Executes the query
      * @returns - The result set
@@ -118,23 +124,19 @@ class Query<O = QueryResult> implements Executable<O> {
             throw new Error("Cannot run a query without a source. Use .from(...) to set one.");
         }
 
-        if (isNull(this.projectionSpec)) {
+        if (isNull(this.parent.projection)) {
             throw new Error(
                 "Cannot run a query without a projection. Use .select(...) or the select() builder function to set one."
             );
         }
 
         let returnedNodes: O[] = [];
-        const datasources: QueryDataSource<any>[] = this.datasource.merge();
+        const datasources: DataSource<AnyObject>[] = this.datasource.merge();
 
-        // Extraction
+        // Extraction and filtering
         for (const source of datasources) {
-            for (const node of source.entries(null)[0]) {
-                if (await this.filter.apply(node)) {
-    
-                    // TODO: apply projection here
-                    returnedNodes.push(node);
-                }
+            for (const node of await source.entries(this._filter, this.parent.projection)) {
+                returnedNodes.push(project(node, this.parent.projection) as O);
             }
         }
 
@@ -157,58 +159,7 @@ class Query<O = QueryResult> implements Executable<O> {
         return returnedNodes;
     }
 
-    public describe(): string {
-        return JSON.stringify(this)
-    }
-}
 
-export class FilterableQuery<O = QueryResult> implements Executable<O> {
-    constructor(private parent: Query<O>) {}
-
-    public and(filter: QueryFilterPredicate | QueryFilterProtocol): FilterableQuery<O> {
-        this.parent.where(filter);
-        return this;
-    }
-
-    public or(...conditions: AnyFilter[]): FilterableQuery<O> {
-        return this.parent.or(...conditions);
-    }
-
-    /**
-     * Sets the limit of the result set size to `n`. `0` means no limit.
-     * @param n - the number of entries to limit to
-     * @returns - the query with a limit set
-     */
-    public limit(n: number) {
-        return this.parent.limit(n);
-    }
-
-    /**
-     * Sets the offset of the result set to `n`.
-     * @param n - the offset index
-     * @returns - the query with an offset set
-     */
-    public offset(n: number) {
-        return this.parent.offset(n);
-    }
-
-    /**
-     * Appends sort rules for this query
-     * @param comparator - The comparator function. See `Comparator`.
-     * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
-     */
-    public sort(comparator: Comparator): void;
-    public sort(comparator: Comparator, direction?: SortDirection): void {
-        return this.parent.sort(comparator, direction);
-    }
-
-    /**
-     * Executes the query
-     * @returns - The result set
-     */
-    public async run(): Promise<O[]> {
-        return this.parent.run();
-    }
 }
 
 /**
@@ -220,6 +171,6 @@ export class FilterableQuery<O = QueryResult> implements Executable<O> {
  * @returns - A `Query` to further customize
  */
 export const select = (...projections: string[]) => {
-    const query: Query = new Query(...projections);
+    const query: Projection = new Projection(...projections);
     return query;
 }

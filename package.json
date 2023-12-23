@@ -1,7 +1,7 @@
 {
   "name": "@jql/jql",
   "version": "1.0.0",
-  "description": "A sql-like querying interface for the dom",
+  "description": "A sql-like querying interface for javascript objects and DOM",
   "engines": {
     "node": ">=18.18.0"
   },
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.8",
     "@types/jsdom": "^21.1.5",
+    "@types/lodash": "^4.14.202",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "esbuild": "^0.19.5",
@@ -36,5 +37,8 @@
     "rimraf": "^5.0.5",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

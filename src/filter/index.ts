@@ -1,4 +1,3 @@
-import { AnyDataSource } from "../datasource/prelude";
 import { isPromise, promisify } from "../inspection";
 
 /**
@@ -24,7 +23,7 @@ export enum QueryFilterChainOperator {
  * Implemented by types who wants to apply some kind of filter to an `Element`
  */
 export interface QueryFilterProtocol {
-    apply(el: AnyDataSource): Promise<boolean>
+    apply(el: any): Promise<boolean>
 }
 
 /**

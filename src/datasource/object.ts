@@ -1,12 +1,28 @@
-import { AnyFilter } from "../filter";
-import { QueryDataSource } from "./prelude";
+import { get, isNull, set } from "lodash";
+import { QueryFilterProtocol } from "../filter";
+import { DataSource } from "./prelude";
 
-export class ObjectQueryDatasource implements QueryDataSource<Record<string | number | symbol, unknown>> {
-    private dsAlias: string | null = null;
-
-    constructor (private source: Record<string | number | symbol, unknown>, ..._args: any[]) {}
+export class ObjectQueryDatasource<T extends object>
+implements DataSource<T> {
+    constructor(private source: T, ..._args: any[]) {}
     
-    entries (_fitler: AnyFilter): [Record<string | number | symbol, unknown>[], boolean] {
-        return [[this.source], false]
+    async entries<U extends keyof T>(filter: QueryFilterProtocol | null, projection: Array<U>):
+        Promise<Iterable<Pick<T, U>>> {
+        
+        const pickResult = () => {
+            const projectedObject: object = {};
+            for (let index = 0; index < projection.length; index++) {
+                const proj = projection[index];
+                set(projectedObject, proj, get(this.source, proj, null))
+            }
+
+            return projectedObject as Pick<T, U>;
+        }
+
+        return !isNull(filter)
+            ? await filter.apply(this.source)
+                ? [pickResult()]
+                : []
+            : [pickResult()];
     }
 }

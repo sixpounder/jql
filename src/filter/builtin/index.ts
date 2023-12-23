@@ -1,4 +1,5 @@
-import { isElement, isUndefined } from "../../inspection";
+import { isUndefined } from "lodash";
+import { isElement } from "../../inspection";
 
 export const tagName = (name: string | string[]): (el: Element) => boolean => {
     return (el) => {

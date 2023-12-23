@@ -47,8 +47,8 @@ describe("Testing JSQuery", () => {
         expect(queryResult).toBeInstanceOf(Array);
         expect(queryResult).toHaveLength(0);
 
-        const queryResult2 = await select("div")
-            .from(document)
+        const queryResult2 = await select("*")
+            .from("document.div")
             .where(node => node.classList.contains("sheep"))
             .run();
         
@@ -103,27 +103,27 @@ describe("Testing JSQuery", () => {
     });
 
     test("Multiple projection", async () => {
-        const queryResult = await select("div, a")
-            .from(document)
+        const queryResult = await select("*")
+            .from("document.div,a")
             .run();
         
         expect(queryResult).toBeInstanceOf(Array);
-        expect(queryResult).toHaveLength(5);
-        expect(queryResult[0].tagName).toBe("HTML");
-        expect(queryResult[1].tagName).toBe("HEAD");
+        expect(queryResult).toHaveLength(2);
+        expect(queryResult[0].tagName).toBe("DIV");
+        expect(queryResult[1].tagName).toBe("DIV");
     });
 
     test("Limit / Offset", async () => {
-        const queryResult = await select("div, a")
-            .from(document)
+        const queryResult = await select("tagName")
+            .from("document.div")
             .limit(1)
             .run();
         
         expect(queryResult).toBeInstanceOf(Array);
         expect(queryResult).toHaveLength(1);
-        expect(queryResult[0].tagName).toBe("HTML");
+        expect(queryResult[0].tagName).toBe("DIV");
 
-        const queryResult2 = await select("div, a")
+        const queryResult2 = await select("tagName")
             .from(document)
             .limit(1)
             .offset(1)
