@@ -1,3 +1,5 @@
+import { sortBy } from "lodash";
+
 export enum Ordering {
     Before = -1,
     Same = 0,
@@ -16,17 +18,18 @@ export enum SortDirection {
  * - `Zero` if `a` and `b` are equal
  * - A positive number if `a` follows `b`
  */
-export type Comparator = <X, Y>(a: X, b: Y) => Ordering;
+export type Comparator<X> = (a: X, b: X) => Ordering;
 
 export type SortRule = {
-    comparator: Comparator,
+    field: string,
     direction: SortDirection
 }
 
 export const sort = <T>(collection: T[], rule: SortRule): T[] => {
-    return collection.toSorted((a, b) => {
-        return rule.direction == SortDirection.Ascending
-            ? rule.comparator(a, b)
-            : rule.comparator(a, b) * -1;
-    });
+    let ordered = sortBy(collection, rule.field);
+    if (rule.direction === SortDirection.Descending) {
+        ordered = ordered.reverse();
+    }
+
+    return ordered;
 }

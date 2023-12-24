@@ -10,7 +10,7 @@ import {
     AnyFilter
 } from "./filter";
 import { filter as projectedObject } from "lodash";
-import { Comparator, SortDirection, SortRule, sort } from "./sort";
+import { SortDirection, SortRule, sort } from "./sort";
 import { isNull, uniq } from "lodash";
 
 export enum FilterChainType {
@@ -106,11 +106,14 @@ class FilterableQuery<P extends string | number | symbol> implements Executable<
      * @param comparator - The comparator function. See `Comparator`.
      * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
      */
-    public sort(comparator: Comparator, direction?: SortDirection): void {
+    public orderBy(field: string, direction: SortDirection = SortDirection.Ascending)
+    : FilterableQuery<P> {
         this.sortRules.push({
-            comparator,
-            direction: direction ?? SortDirection.Ascending
-        })
+            field,
+            direction
+        });
+
+        return this;
     }
 
     public get filter() {
@@ -132,33 +135,37 @@ class FilterableQuery<P extends string | number | symbol> implements Executable<
             );
         }
 
-        let returnedNodes: O[] = [];
+        let unprojectedNodes: AnyObject[] = [];
         const datasources: DataSource<AnyObject>[] = this.datasource.merge();
 
         // Extraction and filtering
         for (const source of datasources) {
-            for (const node of await source.entries(this._filter, this.parent.projection)) {
-                returnedNodes.push(project(node, this.parent.projection) as O);
+            for (const node of await source.entries(this._filter)) {
+                unprojectedNodes.push(node);
             }
         }
 
         // Sorting
         if (this.sortRules.length) {
             for (let i = 0; i < this.sortRules.length; i++) {
-                const rule = this.sortRules[i];
-                sort(returnedNodes, rule);
+                unprojectedNodes = sort(unprojectedNodes, this.sortRules[i]);
             }
         }
 
         // Limit / offset
         if (this.resultsLimit !== 0 || this.resultsOffset !== 0) {
-            returnedNodes = returnedNodes.slice(
+            unprojectedNodes = unprojectedNodes.slice(
                 this.resultsOffset,
-                this.resultsOffset + (this.resultsLimit === 0 ? returnedNodes.length - 1 : this.resultsLimit)
+                this.resultsOffset + (this.resultsLimit === 0 ? unprojectedNodes.length - 1 : this.resultsLimit)
             );
         }
 
-        return returnedNodes;
+        // Projection
+        const projectedNodes: O[] = unprojectedNodes.map(
+            node => project(node, this.parent.projection) as O
+        );
+
+        return projectedNodes;
     }
 
 

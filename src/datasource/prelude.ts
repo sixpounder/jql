@@ -12,7 +12,7 @@ export interface DataSource<T extends object> {
      * @returns A tuple consisting of an iterable over the entries for this data source and a boolean
      * indicating whether the filter was applied eagerly or not.
      */
-    entries(filter: QueryFilterProtocol | null, projection: Array<keyof T>): Promise<Iterable<Pick<T, keyof T>>>;
+    entries(filter: QueryFilterProtocol | null, projection?: Array<keyof T>): Promise<Iterable<Pick<T, keyof T>>>;
 }
 
 export type AnyObject = Record<string | number | symbol, unknown>;

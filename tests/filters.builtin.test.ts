@@ -18,6 +18,7 @@ document.body.appendChild(someOtherDiv);
 
 describe("Testing hasClass filter", () => {
     test("contract", () => {
+        expect(hasClass("leet")({})).toBe(false);
         expect(hasClass("leet")(document.querySelector("div.leet") as Element)).toBe(true);
         expect(hasClass("leet")(document.body)).toBe(false);
         expect(hasClass("foo")("My name is Inigo Montoya" as unknown as Element)).toBe(false);
@@ -44,6 +45,9 @@ describe("Testing hasClass filter", () => {
 
 describe("Testing attr filter", () => {
     test("contract", () => {
+        expect(attr("data-fold")({})).toBe(false);
+        expect(attr("data-fold", "anyValue")({})).toBe(false);
+
         expect(attr("data-fold")(document.querySelector("div.leet") as Element)).toBe(true);
         expect(attr("data-fold", "1")(document.querySelector("div.leet") as Element)).toBe(true);
         expect(attr("data-fold", "1")(document.body)).toBe(false);
