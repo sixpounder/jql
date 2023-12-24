@@ -49,3 +49,13 @@ export const attr = (attr: string, val?: string): (el: any) => boolean => {
             : el.attributes.getNamedItem(attr)?.value === val ?? false;
     };
 }
+
+export const prop = (name: string, val?: string): (el: any) => boolean => {
+    return (el) => {
+        if (isUndefined(val)) {
+            return has(el, name);
+        } else {
+            return get(el, name, null) === val;
+        }
+    }
+}

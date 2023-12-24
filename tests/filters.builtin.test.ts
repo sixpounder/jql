@@ -4,7 +4,7 @@
 
 import { and, not } from "../src/filter";
 import { select } from "../src/query";
-import { attr, hasClass, tagName } from "../src/filter/builtin";
+import { attr, hasClass, prop, tagName } from "../src/filter/builtin";
 
 const someDiv = document.createElement("div");
 someDiv.classList.add("sheep");
@@ -100,5 +100,23 @@ describe("Testing tagName filter", () => {
         
         expect(queryResult).toBeInstanceOf(Array);
         expect(queryResult).toHaveLength(2);
+    });
+});
+
+describe("Testing prop filter", () => {
+    test("contract", () => {
+        const testObject = { p1: "test", p2: "object" };
+
+        expect(prop(null as unknown as string)(testObject)).toBe(false);
+
+        expect(prop("test")(null)).toBe(false);
+        expect(prop("test", "anyValue")(null)).toBe(false);
+        expect(prop("test")(undefined)).toBe(false);
+        expect(prop("test", "anyValue")(undefined)).toBe(false);
+
+        expect(prop("test")(testObject)).toBe(false);
+        expect(prop("p1")(testObject)).toBe(true);
+        expect(prop("p1", "foo")(testObject)).toBe(false);
+        expect(prop("p1", "test")(testObject)).toBe(true);
     });
 });
