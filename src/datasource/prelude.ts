@@ -19,4 +19,4 @@ export type AnyObject = Record<string | number | symbol, unknown>;
 
 export type AnyRawDataSource = AnyObject | ParentNode | string;
 
-export type QueryResult = { [K: string]: Record<string | number | symbol, any> } | Element
+export type QueryResult = { [K: string]: Record<string | number | symbol, any> }

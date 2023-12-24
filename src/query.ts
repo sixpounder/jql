@@ -1,6 +1,6 @@
 import { DatasourceRepository } from "./datasource";
 import { project } from "./datasource/internals";
-import { AnyObject, AnyRawDataSource, DataSource, QueryResult } from "./datasource/prelude";
+import { AnyObject, AnyRawDataSource, DataSource } from "./datasource/prelude";
 import {
     QueryFilterProtocol,
     and,
@@ -21,17 +21,17 @@ export enum FilterChainType {
 /**
  * Implemented by types that can be `exec`uted at some point
  */
-interface Executable<T> {
+interface Executable<P extends string | number | symbol> {
     /**
      * Executes the query and return a result
      */
-    run(): Promise<T[]>
+    run<O extends { [K in P]: any }>(): Promise<O[]>
 }
 
-class Projection<O = QueryResult> {
-    private projectionSpec: string[] | null = null;
+class Projection<P extends string | number | symbol> {
+    private projectionSpec: P[] | null = null;
 
-    constructor(...projectionSpec: string[]) {
+    constructor(...projectionSpec: P[]) {
         this.projectionSpec = projectedObject(uniq(projectionSpec), (projectionItem) => projectionItem !== "*");
     }
 
@@ -40,8 +40,8 @@ class Projection<O = QueryResult> {
      * @param rootNode - The node for this query data source
      * @returns - the query with the data source added
      */
-    public from(source: AnyRawDataSource): FilterableQuery<O> {
-        return new FilterableQuery(this, source);
+    public from(...sources: AnyRawDataSource[]): FilterableQuery<P> {
+        return new FilterableQuery(this, sources);
     }
 
     public get projection() {
@@ -53,15 +53,17 @@ class Projection<O = QueryResult> {
     }
 }
 
-class FilterableQuery<O> implements Executable<O> {
+class FilterableQuery<P extends string | number | symbol> implements Executable<P> {
     private datasource: DatasourceRepository = new DatasourceRepository();
     private resultsLimit = 0;
     private resultsOffset = 0;
     private sortRules: SortRule[] = [];
     private _filter: QueryFilterProtocol = identity;
 
-    constructor(private parent: Projection<O>, source: AnyRawDataSource) {
-        this.datasource.add(source);
+    constructor(private parent: Projection<P>, sources: AnyRawDataSource[]) {
+        for (const source of sources) {
+            this.datasource.add(source);
+        }
     }
 
     /**
@@ -69,7 +71,7 @@ class FilterableQuery<O> implements Executable<O> {
      * @param conditions - the filters to append to the filter list
      * @returns - The query with the filters appended
      */
-    public where(...conditions: AnyFilter[]): FilterableQuery<O> {
+    public where(...conditions: AnyFilter[]): FilterableQuery<P> {
         if (conditions.length === 1 && isPredicate(conditions[0])) {
             this._filter = filter(conditions[0])
         } else {
@@ -119,7 +121,7 @@ class FilterableQuery<O> implements Executable<O> {
      * Executes the query
      * @returns - The result set
      */
-    public async run(): Promise<O[]> {
+    public async run<O extends { [K in P]: any }>(): Promise<O[]> {
         if (isNull(this.datasource) || this.datasource.isEmpty()) {
             throw new Error("Cannot run a query without a source. Use .from(...) to set one.");
         }
@@ -170,7 +172,7 @@ class FilterableQuery<O> implements Executable<O> {
  *               available to that API if you know how to.
  * @returns - A `Query` to further customize
  */
-export const select = (...projections: string[]) => {
-    const query: Projection = new Projection(...projections);
+export const select = <P extends string | number | symbol>(...projections: P[]) => {
+    const query: Projection<P> = new Projection(...projections);
     return query;
 }

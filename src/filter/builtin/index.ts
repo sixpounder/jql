@@ -1,13 +1,20 @@
-import { isUndefined } from "lodash";
+import { get, has, isString, isUndefined } from "lodash";
 import { isElement } from "../../inspection";
 
-export const tagName = (name: string | string[]): (el: Element) => boolean => {
+export const tagName = (name: string | string[]): (el: any) => boolean => {
     return (el) => {
-        if (!isElement(el)) {
+        let tname: string;
+        if (el instanceof Element || has(el, "tagName")) {
+            const prop = get(el, "tagName");
+            if (isString(prop)) {
+                tname = prop.toLowerCase();
+            } else {
+                return false;
+            }
+        } else {
             return false;
         }
-        
-        const tname = el.tagName.toLowerCase();
+
         if (Array.isArray(name)) {
             return name.find(t => t.toLowerCase() === tname) !== undefined;
         } else {
@@ -16,7 +23,7 @@ export const tagName = (name: string | string[]): (el: Element) => boolean => {
     }
 }
 
-export const hasClass = (klass: string | string[]): (el: Element) => boolean => {
+export const hasClass = (klass: string | string[]): (el: any) => boolean => {
     const cls = Array.isArray(klass) ? klass : [klass];
     return (el) => {
         
@@ -31,7 +38,7 @@ export const hasClass = (klass: string | string[]): (el: Element) => boolean => 
     }
 }
 
-export const attr = (attr: string, val?: string): (el: Element) => boolean => {
+export const attr = (attr: string, val?: string): (el: any) => boolean => {
     return (el) => {
         if (!isElement(el)) {
             return false;

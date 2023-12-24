@@ -15,7 +15,7 @@ const someOtherDiv = document.createElement("div");
 someOtherDiv.classList.add("leet");
 document.body.appendChild(someOtherDiv);
 
-describe("Testing JSQuery", () => {
+describe("Testing jql on DOM", () => {
     test("DOM select * from *", async () => {
 
         const queryResult = await select("*")
@@ -37,7 +37,7 @@ describe("Testing JSQuery", () => {
 
     test("Single condition queries by classList", async () => {
 
-        const queryResult = await select("div")
+        const queryResult = await select("*")
             .from(document)
             .where(node => {
                 return node.classList.contains("wolf");
@@ -57,7 +57,7 @@ describe("Testing JSQuery", () => {
     });
 
     test("Single async condition", async () => {
-        const queryResult = await select("div")
+        const queryResult = await select("*")
             .from(document)
             .where(async node => {
                 await sleep(100);
@@ -71,7 +71,7 @@ describe("Testing JSQuery", () => {
 
     test("Multiple condition queries (intersection)", async () => {
 
-        const queryResult = await select("div")
+        const queryResult = await select("*")
             .from(document)
             .where(
                 and(
@@ -87,7 +87,7 @@ describe("Testing JSQuery", () => {
 
     test("Multiple condition queries (union)", async () => {
 
-        const queryResult = await select("div")
+        const queryResult = await select("*")
             .from(document)
             .where(
                 not(node => node.classList.contains("wolf")),
@@ -103,7 +103,7 @@ describe("Testing JSQuery", () => {
     });
 
     test("Multiple projection", async () => {
-        const queryResult = await select("*")
+        const queryResult = await select()
             .from("document.div,a")
             .run();
         

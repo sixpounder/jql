@@ -54,7 +54,7 @@ describe("Testing attr filter", () => {
 
     test("query", async () => {
 
-        const queryResult = await select("div")
+        const queryResult = await select("*")
             .from(document)
             .where(
                 and(
@@ -67,7 +67,7 @@ describe("Testing attr filter", () => {
         expect(queryResult).toBeInstanceOf(Array);
         expect(queryResult).toHaveLength(1);
 
-        const queryResult2 = await select("div")
+        const queryResult2 = await select("*")
             .from(document)
             .where(attr("data-fold"))
             .run();
