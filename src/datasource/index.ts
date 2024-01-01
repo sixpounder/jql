@@ -1,4 +1,4 @@
-import { isString } from "lodash";
+import { isString } from "lodash-es";
 import { ObjectQueryDatasource, ArrayQueryDatasource } from ".";
 import { isParentNode } from "../inspection";
 import { DocumentQueryDatasource } from "./dom";

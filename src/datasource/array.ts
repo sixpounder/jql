@@ -1,4 +1,4 @@
-import { isNull } from "lodash";
+import { isNull } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
 import { AnyObject, DataSource } from "./prelude";
 import { project } from "./internals";

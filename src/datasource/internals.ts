@@ -1,4 +1,4 @@
-import { get, isEmpty, isNull, isUndefined, set } from "lodash";
+import { get, isEmpty, isNull, isUndefined, set } from "lodash-es";
 import { AnyObject } from "./prelude";
 
 export function project<T, U extends keyof T>(obj: T, projection: Array<U> | null | undefined) {

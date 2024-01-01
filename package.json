@@ -1,7 +1,7 @@
 {
   "name": "@jql/jql",
   "version": "1.0.0",
-  "description": "A sql-like querying interface for javascript objects and DOM",
+  "description": "A sql-like querying interface for javascript objects and the DOM",
   "engines": {
     "node": ">=18.18.0"
   },
@@ -15,8 +15,8 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
-    "build:mjs": "esbuild ./src/lib.ts --bundle --format=esm --outfile=dist/jql.mjs",
-    "build:cjs": "esbuild ./src/lib.ts --bundle --format=cjs --outfile=dist/jql.cjs",
+    "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/jql.mjs",
+    "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/jql.cjs",
     "copy-assets": "cp build/templates/package.json.template dist/package.json && cp README.md dist/README.md",
     "lint": "eslint --fix .",
     "test": "jest"
@@ -26,7 +26,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.8",
     "@types/jsdom": "^21.1.5",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash-es": "^4.17.12",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "esbuild": "^0.19.5",
@@ -39,6 +39,6 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "lodash": "^4.17.21"
+    "lodash-es": "^4.17.21"
   }
 }

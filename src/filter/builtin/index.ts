@@ -1,4 +1,4 @@
-import { get, has, isString, isUndefined } from "lodash";
+import { get, has, isString, isUndefined } from "lodash-es";
 import { isElement } from "../../inspection";
 
 export const tagName = (name: string | string[]): (el: any) => boolean => {

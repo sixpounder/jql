@@ -9,9 +9,9 @@ import {
     isPredicate,
     AnyFilter
 } from "./filter";
-import { filter as projectedObject } from "lodash";
+import { filter as projectedObject } from "lodash-es";
 import { SortDirection, SortRule, sort } from "./sort";
-import { isNull, uniq } from "lodash";
+import { isNull, uniq } from "lodash-es";
 
 export enum FilterChainType {
     Intersection,
@@ -21,17 +21,17 @@ export enum FilterChainType {
 /**
  * Implemented by types that can be `exec`uted at some point
  */
-interface Executable<P extends string | number | symbol> {
+interface Executable<P extends string | symbol> {
     /**
      * Executes the query and return a result
      */
     run<O extends { [K in P]: any }>(): Promise<O[]>
 }
 
-class Projection<P extends string | number | symbol> {
-    private projectionSpec: P[] | null = null;
+class Projection<TProject extends string | symbol> {
+    private projectionSpec: TProject[] | null = null;
 
-    constructor(...projectionSpec: P[]) {
+    constructor(...projectionSpec: TProject[]) {
         this.projectionSpec = projectedObject(uniq(projectionSpec), (projectionItem) => projectionItem !== "*");
     }
 
@@ -40,8 +40,8 @@ class Projection<P extends string | number | symbol> {
      * @param rootNode - The node for this query data source
      * @returns - the query with the data source added
      */
-    public from(...sources: AnyRawDataSource[]): FilterableQuery<P> {
-        return new FilterableQuery(this, sources);
+    public from(...sources: AnyRawDataSource[]): FilterableQuery<TProject> {
+        return new FilterableQuery<TProject>(this, sources);
     }
 
     public get projection() {
@@ -53,14 +53,14 @@ class Projection<P extends string | number | symbol> {
     }
 }
 
-class FilterableQuery<P extends string | number | symbol> implements Executable<P> {
+class FilterableQuery<TProject extends string | symbol> implements Executable<TProject> {
     private datasource: DatasourceRepository = new DatasourceRepository();
     private resultsLimit = 0;
     private resultsOffset = 0;
     private sortRules: SortRule[] = [];
     private _filter: QueryFilterProtocol = identity;
 
-    constructor(private parent: Projection<P>, sources: AnyRawDataSource[]) {
+    constructor(private parent: Projection<TProject>, sources: AnyRawDataSource[]) {
         for (const source of sources) {
             this.datasource.add(source);
         }
@@ -71,7 +71,7 @@ class FilterableQuery<P extends string | number | symbol> implements Executable<
      * @param conditions - the filters to append to the filter list
      * @returns - The query with the filters appended
      */
-    public where(...conditions: AnyFilter[]): FilterableQuery<P> {
+    public where(...conditions: AnyFilter[]): FilterableQuery<TProject> {
         if (conditions.length === 1 && isPredicate(conditions[0])) {
             this._filter = filter(conditions[0])
         } else {
@@ -107,7 +107,7 @@ class FilterableQuery<P extends string | number | symbol> implements Executable<
      * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
      */
     public orderBy(field: string, direction: SortDirection = SortDirection.Ascending)
-    : FilterableQuery<P> {
+    : FilterableQuery<TProject> {
         this.sortRules.push({
             field,
             direction
@@ -124,7 +124,7 @@ class FilterableQuery<P extends string | number | symbol> implements Executable<
      * Executes the query
      * @returns - The result set
      */
-    public async run<O extends { [K in P]: any }>(): Promise<O[]> {
+    public async run<O extends { [K in TProject]: any }>(): Promise<O[]> {
         if (isNull(this.datasource) || this.datasource.isEmpty()) {
             throw new Error("Cannot run a query without a source. Use .from(...) to set one.");
         }
@@ -179,7 +179,7 @@ class FilterableQuery<P extends string | number | symbol> implements Executable<
  *               available to that API if you know how to.
  * @returns - A `Query` to further customize
  */
-export const select = <P extends string | number | symbol>(...projections: P[]) => {
+export const select = <P extends string | symbol>(...projections: P[]) => {
     const query: Projection<P> = new Projection(...projections);
     return query;
 }
