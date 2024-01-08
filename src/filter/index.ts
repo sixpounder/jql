@@ -31,57 +31,57 @@ export interface QueryFilterProtocol {
  * functions provided: `and`, `or` and `not`
  */
 export class QueryFilter implements QueryFilterProtocol {
-    constructor(
+  constructor(
         private _chainOp: QueryFilterChainOperator = QueryFilterChainOperator.Intersection,
         private _negated: boolean = false,
         private _filters: AnyAsyncFilter[] = [],
-    ) {
-        this._filters = this._filters.map(maybeAsyncFilter => {
-            if (isPredicate(maybeAsyncFilter)) {
-                return promisify(maybeAsyncFilter);
-            } else {
-                return maybeAsyncFilter;
-            }
-        })
-    }
+  ) {
+    this._filters = this._filters.map(maybeAsyncFilter => {
+      if (isPredicate(maybeAsyncFilter)) {
+        return promisify(maybeAsyncFilter);
+      } else {
+        return maybeAsyncFilter;
+      }
+    })
+  }
 
-    public get chainOp(): QueryFilterChainOperator {
-        return this._chainOp;
-    }
+  public get chainOp(): QueryFilterChainOperator {
+    return this._chainOp;
+  }
 
-    public get negated(): boolean {
-        return this._negated;
-    }
+  public get negated(): boolean {
+    return this._negated;
+  }
 
-    public get filters(): AnyAsyncFilter[] {
-        return this._filters;
-    }
+  public get filters(): AnyAsyncFilter[] {
+    return this._filters;
+  }
 
-    /**
+  /**
      * Applies this filter to `element`
      * @param element - the evaluated element
      * @returns - A promise of the boolean resolved by this filter
      */
-    async apply(element: Element): Promise<boolean> {
-        let provisional;
-        if (this.chainOp === QueryFilterChainOperator.Union) {
-            provisional = false;
-            for (let i = 0; i < this.filters.length; i++) {
-                const fn = this.filters[i];
-                const res = await callFilter(fn, element);
-                provisional = provisional || res;
-            }
-        } else {
-            provisional = true;
-            for (let i = 0; i < this.filters.length; i++) {
-                const fn = this.filters[i];
-                const res = await callFilter(fn, element);
-                provisional = provisional && res;
-            }
-        }
-
-        return this.negated ? !provisional : provisional;
+  async apply(element: Element): Promise<boolean> {
+    let provisional;
+    if (this.chainOp === QueryFilterChainOperator.Union) {
+      provisional = false;
+      for (let i = 0; i < this.filters.length; i++) {
+        const fn = this.filters[i];
+        const res = await callFilter(fn, element);
+        provisional = provisional || res;
+      }
+    } else {
+      provisional = true;
+      for (let i = 0; i < this.filters.length; i++) {
+        const fn = this.filters[i];
+        const res = await callFilter(fn, element);
+        provisional = provisional && res;
+      }
     }
+
+    return this.negated ? !provisional : provisional;
+  }
 }
 
 /**
@@ -92,11 +92,11 @@ export class QueryFilter implements QueryFilterProtocol {
  */
 const callFilter = async (fn: AnyFilter, el: Element): Promise<boolean> => {
 
-    return isPredicate(fn)
-        ? promisify<boolean>(fn)(el)
-        : isQueryFilter(fn)
-            ? fn.apply(el)
-            : fn(el);
+  return isPredicate(fn)
+    ? promisify<boolean>(fn)(el)
+    : isQueryFilter(fn)
+      ? fn.apply(el)
+      : fn(el);
 }
 
 /**
@@ -105,7 +105,7 @@ const callFilter = async (fn: AnyFilter, el: Element): Promise<boolean> => {
  * @returns - If value complies with `QueryFilterProtocol`
  */
 export const isQueryFilter = (value: any): value is QueryFilterProtocol => {
-    return value instanceof QueryFilter;
+  return value instanceof QueryFilter;
 }
 
 /**
@@ -114,7 +114,7 @@ export const isQueryFilter = (value: any): value is QueryFilterProtocol => {
  * @returns - If value is a predicate
  */
 export const isPredicate = (value: any): value is QueryFilterPredicate => {
-    return !isPromise(value) && typeof value === "function";
+  return !isPromise(value) && typeof value === "function";
 }
 
 /**
@@ -123,7 +123,7 @@ export const isPredicate = (value: any): value is QueryFilterPredicate => {
  * @returns - If value is an asyncronous predicate
  */
 export const isPredicateAsync = (value: any): value is QueryFilterPredicateAsync => {
-    return isPromise(value);
+  return isPromise(value);
 }
 
 /**
@@ -132,7 +132,7 @@ export const isPredicateAsync = (value: any): value is QueryFilterPredicateAsync
  * @returns 
  */
 export const filter = (predicate: QueryFilterPredicate): QueryFilterProtocol => {
-    return new QueryFilter(QueryFilterChainOperator.Intersection, false, [predicate]);
+  return new QueryFilter(QueryFilterChainOperator.Intersection, false, [predicate]);
 }
 
 /**
@@ -156,7 +156,7 @@ export const filter = (predicate: QueryFilterPredicate): QueryFilterProtocol => 
  * ```
  */
 export const and = (...filters: AnyFilter[]): QueryFilterProtocol => {
-    return new QueryFilter(QueryFilterChainOperator.Intersection, false, filters);
+  return new QueryFilter(QueryFilterChainOperator.Intersection, false, filters);
 }
 
 /**
@@ -180,7 +180,7 @@ export const and = (...filters: AnyFilter[]): QueryFilterProtocol => {
  * ```
  */
 export const or = (...filters: AnyFilter[]): QueryFilterProtocol => {
-    return new QueryFilter(QueryFilterChainOperator.Union, false, filters);
+  return new QueryFilter(QueryFilterChainOperator.Union, false, filters);
 }
 
 /**
@@ -204,7 +204,7 @@ export const or = (...filters: AnyFilter[]): QueryFilterProtocol => {
  * ```
  */
 export const not = (filter: AnyFilter): QueryFilterProtocol => {
-    return new QueryFilter(QueryFilterChainOperator.Intersection, true, [filter]);
+  return new QueryFilter(QueryFilterChainOperator.Intersection, true, [filter]);
 }
 
 /**

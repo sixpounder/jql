@@ -1,31 +1,42 @@
-import { get, has, isString, isUndefined } from "lodash-es";
+import { get, hasIn, isEmpty, isNull, isString, isUndefined } from "lodash-es";
 import { isElement } from "../../inspection";
 
 /**
  * Returns a predicate that filters based on the `tagName` property of an object
- * @param name - the name to match the `tagName` against
- * @returns - The predicate
+ * @param expected - the tag name(s) to match the `tagName` against
+ * @returns - A predicate that returns `true` if at least one `expected` name matches the element `tagName`
+ * 
+ * # Example
+ * 
+ * ```typescript
+ * select().from("document").where(tagName("div")).run() // [{ tagName: "DIV", ... }, ...]
+ * ```
  */
-export const tagName = (name: string | string[]): (el: any) => boolean => {
-    return (el) => {
-        let tname: string;
-        if (el instanceof Element || has(el, "tagName")) {
-            const prop = get(el, "tagName");
-            if (isString(prop)) {
-                tname = prop.toLowerCase();
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-
-        if (Array.isArray(name)) {
-            return name.find(t => t.toLowerCase() === tname) !== undefined;
-        } else {
-            return tname === name.toLowerCase();
-        }
+export const tagName = (expected: string | string[]): (el: any) => boolean => {
+  return (el) => {
+    if (isNull(expected) || isUndefined(expected) || isEmpty(expected)) {
+      return false;
     }
+
+    // Check if el is an `Element` because that's faster than checking for own or
+    // inherited properties, only do that is that's necessary
+    if (isElement(el) || hasIn(el, "tagName")) {
+      const prop = get(el, "tagName");
+      if (isString(prop)) {
+        const tname = prop.toLowerCase();
+
+        if (Array.isArray(expected)) {
+          return !isUndefined(expected.find(t => t.toLowerCase() === tname));
+        } else {
+          return tname === expected.toLowerCase();
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 }
 
 /**
@@ -34,18 +45,18 @@ export const tagName = (name: string | string[]): (el: any) => boolean => {
  * @returns - The predicate
  */
 export const hasClass = (klass: string | string[]): (el: any) => boolean => {
-    const cls = Array.isArray(klass) ? klass : [klass];
-    return (el) => {
+  const cls = Array.isArray(klass) ? klass : [klass];
+  return (el) => {
         
-        if (!isElement(el)) {
-            return false;
-        }
-
-        return cls.reduce((acc, currentClass) => {
-            acc = acc && el.classList.contains(currentClass);
-            return acc;
-        }, true)
+    if (!isElement(el)) {
+      return false;
     }
+
+    return cls.reduce((acc, currentClass) => {
+      acc = acc && el.classList.contains(currentClass);
+      return acc;
+    }, true)
+  }
 }
 
 /**
@@ -55,17 +66,32 @@ export const hasClass = (klass: string | string[]): (el: any) => boolean => {
  * @param attr - The attribute to search for
  * @param val - The attribute value to match against
  * @returns - The predicate
+ * 
+ * # Example
+ * 
+ * ```typescript
+ * 
+ * select().from("document").where(attr("src")).run()
+ * // [{ tagName: "IMG", src: "***", ... }]
+ * 
+ * select()
+ *   .from("document")
+ *   .where(attr("src", "https://some.image.url"))
+ *   .run()
+ * // [{ tagName: "IMG", src: ""https://some.image.url"", ... }]
+ * 
+ * ```
  */
 export const attr = (attr: string, val?: string): (el: any) => boolean => {
-    return (el) => {
-        if (!isElement(el)) {
-            return false;
-        }
+  return (el) => {
+    if (!isElement(el)) {
+      return false;
+    }
 
-        return isUndefined(val)
-            ? el.hasAttribute(attr)
-            : el.attributes.getNamedItem(attr)?.value === val ?? false;
-    };
+    return isUndefined(val)
+      ? el.hasAttribute(attr)
+      : el.attributes.getNamedItem(attr)?.value === val ?? false;
+  };
 }
 
 /**
@@ -87,11 +113,11 @@ export const attr = (attr: string, val?: string): (el: any) => boolean => {
  * ```
  */
 export const prop = (name: string, val?: string): (el: any) => boolean => {
-    return (el) => {
-        if (isUndefined(val)) {
-            return has(el, name);
-        } else {
-            return get(el, name, null) === val;
-        }
+  return (el) => {
+    if (isUndefined(val)) {
+      return hasIn(el, name);
+    } else {
+      return get(el, name, null) === val;
     }
+  }
 }

@@ -26,10 +26,10 @@ export type SortRule = {
 }
 
 export const sort = <T>(collection: T[], rule: SortRule): T[] => {
-    let ordered = sortBy(collection, rule.field);
-    if (rule.direction === SortDirection.Descending) {
-        ordered = ordered.reverse();
-    }
+  let ordered = sortBy(collection, rule.field);
+  if (rule.direction === SortDirection.Descending) {
+    ordered = ordered.reverse();
+  }
 
-    return ordered;
+  return ordered;
 }
