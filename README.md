@@ -1,6 +1,6 @@
-# jql
+# sequel
 
-`jql` is a small library that provides a sql-like interface for querying and aggregating javascript objects and DOM nodes.
+`sequel` is a small library that provides a sql-like interface for querying and aggregating javascript objects and DOM nodes.
 
 ## Features
 
@@ -14,7 +14,7 @@
 ### Installation
 
 ```sh
-npm i -S @dpw/jql
+npm i sequel
 ```
 
 ### DOM querying
@@ -114,7 +114,7 @@ A: If you need to combine results from different objects / nodes / collections i
 
 ---
 
-**Q: Should I use jql instead of plain old query selectors?**
+**Q: Should I use sequel instead of plain old query selectors?**
 
 A: It depends: if the filtering you need can be done with document.querySelector[All] and you know how to use it then, by all means, go for it. This can still be usefull if you need to filter results with a function and you want to add some readability to your code.
 

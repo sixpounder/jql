@@ -1,5 +1,5 @@
 {
-  "name": "@dpw/jql",
+  "name": "sequel",
   "version": "0.1.0",
   "description": "A sql-like querying interface for javascript objects and the DOM",
   "engines": {
@@ -7,16 +7,16 @@
   },
   "exports": {
     ".": {
-      "types": "./lib/jql.d.ts",
-      "main": "./lib/jql.js",
-      "module": "./jql.mjs",
-      "default": "./jql.mjs"
+      "types": "./lib/sequel.d.ts",
+      "main": "./lib/sequel.js",
+      "module": "./sequel.mjs",
+      "default": "./sequel.mjs"
     }
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
-    "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/jql.mjs",
-    "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/jql.cjs",
+    "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/sequel.mjs",
+    "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/sequel.cjs",
     "copy-assets": "node build/assets.cjs dist && cp README.md dist/README.md",
     "lint": "eslint --fix .",
     "link": "npm run build && cd dist && npm link",
