@@ -15,7 +15,7 @@ const someOtherDiv = document.createElement("div");
 someOtherDiv.classList.add("leet");
 document.body.appendChild(someOtherDiv);
 
-describe("Testing sequel on DOM", () => {
+describe("Testing obql on DOM", () => {
   test("DOM select * from *", async () => {
 
     const queryResult = await select("*")

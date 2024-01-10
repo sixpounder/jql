@@ -1,26 +1,32 @@
 {
-  "name": "sequel",
+  "name": "obql",
   "version": "0.1.0",
-  "description": "A sql-like querying interface for javascript objects and the DOM",
+  "description": "A sql-like querying and aggregating interface for javascript objects and the DOM",
   "engines": {
     "node": ">=18.18.0"
   },
+  "keywords": [
+    "sql",
+    "dom",
+    "query",
+    "collections"
+  ],
   "exports": {
     ".": {
-      "types": "./lib/sequel.d.ts",
-      "main": "./lib/sequel.js",
-      "module": "./sequel.mjs",
-      "default": "./sequel.mjs"
+      "types": "./lib/obql.d.ts",
+      "main": "./lib/obql.js",
+      "module": "./obql.mjs",
+      "default": "./obql.mjs"
     }
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
-    "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/sequel.mjs",
-    "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/sequel.cjs",
+    "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/obql.mjs",
+    "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/obql.cjs",
     "copy-assets": "node build/assets.cjs dist && cp README.md dist/README.md",
     "lint": "eslint --fix .",
     "link": "npm run build && cd dist && npm link",
-    "publish-package": "npm run build && cd dist && npm publish",
+    "publish-package": "npm run build && npm test && cd dist && npm publish",
     "test": "jest --coverage"
   },
   "author": "Andrea Coronese <sixpounder@protonmail.com>",
