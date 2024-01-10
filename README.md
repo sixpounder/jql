@@ -4,10 +4,10 @@
 
 ## Features
 
-- Small footprint: no prototype polluting
-- Small size
-- Only one small external dependency
-- No reason behind it 🤷
+- 🤏 Small size: ~15kb gzipped
+- ☝️ Only one small external dependency
+- 👣 Small footprint: no prototype polluting
+- 🤷 No reason behind it
 
 ## Usage
 
