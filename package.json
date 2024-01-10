@@ -1,9 +1,15 @@
 {
   "name": "obql",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A sql-like querying and aggregating interface for javascript objects and the DOM",
+  "contributors": [
+    {
+      "name": "Andrea Coronese",
+      "email": "sixpounder@protonmail.com"
+    }
+  ],
   "engines": {
-    "node": ">=18.18.0"
+    "node": "^16.0.0 ^18.0.0"
   },
   "keywords": [
     "sql",
@@ -11,6 +17,9 @@
     "query",
     "collections"
   ],
+  "repository": {
+    "url": "git+https://github.com/sixpounder/obql.git"
+  },
   "exports": {
     ".": {
       "types": "./lib/obql.d.ts",
