@@ -49,6 +49,9 @@ describe("Testing attr filter", () => {
     expect(attr("data-fold", "anyValue")({})).toBe(false);
 
     expect(attr("data-fold")(document.querySelector("div.leet") as Element)).toBe(true);
+    expect(attr("data-fold", "2")(document.querySelector("div.leet") as Element)).toBe(false);
+    expect(attr("non-existent-attr")(document.querySelector("div.leet") as Element)).toBe(false);
+
     expect(attr("data-fold", "1")(document.querySelector("div.leet") as Element)).toBe(true);
     expect(attr("data-fold", "1")(document.body)).toBe(false);
     expect(attr("data-fold", "1")("My name is Inigo Montoya" as unknown as Element)).toBe(false);
@@ -83,6 +86,11 @@ describe("Testing attr filter", () => {
 
 describe("Testing tagName filter", () => {
   test("contract", () => {
+    expect(tagName("div")({})).toBe(false);
+    expect(tagName("div")({ tagName: 1 })).toBe(false);
+
+    expect(tagName(null as any)(document.querySelector("div.leet") as Element)).toBe(false);
+    expect(tagName()(document.querySelector("div.leet") as Element)).toBe(false);
     expect(tagName("div")(document.querySelector("div.leet") as Element)).toBe(true);
     expect(tagName("a")(document.body)).toBe(false);
     expect(tagName("a")("My name is Inigo Montoya" as unknown as Element)).toBe(false);
@@ -122,5 +130,8 @@ describe("Testing prop filter", () => {
     expect(prop("p1")(testObject)).toBe(true);
     expect(prop("p1", "foo")(testObject)).toBe(false);
     expect(prop("p1", "test")(testObject)).toBe(true);
+
+    expect(prop("p1", /^t.*t$/)(testObject)).toBe(true);
+    expect(prop("p1", /^Inigo montoya$/)(testObject)).toBe(false);
   });
 });

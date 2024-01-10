@@ -26,4 +26,9 @@ describe("Testing inspection library", () => {
     const promisified = promisify(notAPromise)
     expect(isPromise(promisified("inigo montoya"))).toBe(true);
   })
+
+  test("promisify (reject)", () => {
+    const promisified = promisify(() => { throw new Error("Prepare to die") });
+    expect(promisified()).rejects.toThrow("Prepare to die");
+  })
 })

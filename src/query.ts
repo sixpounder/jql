@@ -48,6 +48,7 @@ class Projection<TProject extends string | symbol> {
     return this.projectionSpec;
   }
 
+  /* istanbul ignore next */
   public describe(): string {
     return JSON.stringify(this)
   }
@@ -125,7 +126,8 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
      * @returns - The result set
      */
   public async run<O extends { [K in TProject]: any }>(): Promise<O[]> {
-    if (isNull(this.datasource) || this.datasource.isEmpty()) {
+    /* instanbul ignore next */
+    if (isNull(this.datasource)) {
       throw new Error("Cannot run a query without a source. Use .from(...) to set one.");
     }
 
@@ -140,7 +142,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
 
     // Extraction and filtering
     for (const source of datasources) {
-      for (const node of await source.entries(this._filter)) {
+      for (const node of await source.entries(this.filter)) {
         unprojectedNodes.push(node);
       }
     }

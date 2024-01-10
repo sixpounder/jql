@@ -14,7 +14,7 @@
 ### Installation
 
 ```sh
-npm i -S @jql/jql
+npm i -S @dpw/jql
 ```
 
 ### DOM querying
@@ -57,10 +57,35 @@ const sampleCollection = [
   { name: "trash", description: "This will not be selected" }
 ];
 
-const results = await select("*")
+const results = await select()
   .from(sampleObj, sampleCollection)
   .where(
       prop("name", /^obj/)
+  )
+  .run()
+```
+
+### Custom query filters
+
+In the previous examples the provided builtin filters are used for simplicity's sake, but keep in mind that filters are just predicates, namely just functions that take an input and return a `boolean`, so you can provide any logic you want in those function bodies.
+
+These predicates can be async.
+
+As an extreme example, if you would like to filter all elements based on a flip of a coin:
+
+```typescript
+const sampleObj = { name: "obj1", description: "Some object" };
+
+const sampleCollection = [
+  { name: "obj23", description: "Object 23" },
+  { name: "obj111", description: "My name is Inigo Montoya" },
+  { name: "trash", description: "This will not be selected" }
+];
+
+const results = await select()
+  .from(sampleObj, sampleCollection)
+  .where(
+      (el) => Math.random() >= 0.5
   )
   .run()
 ```
@@ -71,7 +96,11 @@ You can mix DOM / collections / objects as datasources in a single query
 
 ## FAQ
 
-> FAQ is used in place of "Frequently Asked Questions". Indeed my friends and coworkers frequently ask me 'Why?'
+> Why, in the name of all that is holy, did you do this?
+>
+> *- Coworkers and friends*
+
+---
 
 **Q: Why this library?**
 
@@ -87,4 +116,10 @@ A: If you need to combine results from different objects / nodes / collections i
 
 **Q: Should I use jql instead of plain old query selectors?**
 
-A: It depends: if the filtering you need can be done with document.querySelector[All] and you know how to use it then by all means go for it. This can still be usefull if you need to filter results with function and you want to add some readability to your code.
+A: It depends: if the filtering you need can be done with document.querySelector[All] and you know how to use it then, by all means, go for it. This can still be usefull if you need to filter results with a function and you want to add some readability to your code.
+
+---
+
+**Q: Does this support joining datasources?**
+
+A: Not yet, but it will eventually.

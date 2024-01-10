@@ -1,25 +1,27 @@
 {
-  "name": "@jql/jql",
-  "version": "1.0.0",
+  "name": "@dpw/jql",
+  "version": "0.1.0",
   "description": "A sql-like querying interface for javascript objects and the DOM",
   "engines": {
     "node": ">=18.18.0"
   },
   "exports": {
     ".": {
-      "types": "./dist/lib/jql.d.ts",
-      "main": "./dist/lib/jql.js",
-      "module": "./dist/jql.mjs",
-      "default": "./dist/jql.mjs"
+      "types": "./lib/jql.d.ts",
+      "main": "./lib/jql.js",
+      "module": "./jql.mjs",
+      "default": "./jql.mjs"
     }
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
     "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/jql.mjs",
     "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/jql.cjs",
-    "copy-assets": "cp build/templates/package.json.template dist/package.json && cp README.md dist/README.md",
+    "copy-assets": "node build/package.cjs dist/package.json && cp README.md dist/README.md",
     "lint": "eslint --fix .",
-    "test": "jest"
+    "link": "npm run build && cd dist && npm link",
+    "publish-package": "npm run build && cd dist && npm publish",
+    "test": "jest --coverage"
   },
   "author": "Andrea Coronese <sixpounder@protonmail.com>",
   "license": "MIT",

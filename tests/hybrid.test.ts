@@ -22,6 +22,14 @@ const testObject = {
 }
 
 describe("Testing hybrid queries", () => {
+  test("Hybrid selection with no projection", async () => {
+    const result = await select("tagName", "description")
+      .from("document.div", testObject)
+      .run();
+    expect(result).toHaveLength(3);
+    expect(result[2]).toHaveProperty("description", "I am a regular object");
+  })
+
   test("Hybrid selection", async () => {
     const result = await select("tagName", "description")
       .from("document.div", testObject)
