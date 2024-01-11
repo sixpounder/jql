@@ -1,4 +1,4 @@
-import { compact, get, hasIn, isEmpty, isNil, isString, isUndefined } from "lodash-es";
+import { compact, get, hasIn, isEmpty, isNil, isRegExp, isString, isUndefined } from "lodash-es";
 import { isElement } from "../../inspection";
 
 /**
@@ -116,16 +116,16 @@ export const attr = (attr: string, val?: string): (el: any) => boolean => {
  * select().from({ name: "Some value" }).where(prop("name", /^Some/)).run() // [{ name: "Some value" }]
  * ```
  */
-export const prop = (name: string, expected?: string | RegExp): (el: any) => boolean => {
+export const prop = (name: string, expected?: any): (el: any) => boolean => {
   return (el) => {
     if (isNil(expected)) {
       return hasIn(el, name);
     } else {
       const value = get(el, name, null);
-      if (isString(expected)) {
-        return value === expected;
-      } else {
+      if (isRegExp(expected)) {
         return expected.test(value);
+      } else {
+        return value === expected;
       }
     }
   }

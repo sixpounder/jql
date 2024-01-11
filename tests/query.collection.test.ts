@@ -1,4 +1,4 @@
-import { isNull, notNull } from "../src/filter/builtin";
+import { isNull, notNull, prop } from "../src/filter/builtin";
 import { select } from "../src/query";
 
 describe("Testing obql on collections", () => {
@@ -36,5 +36,36 @@ describe("Testing obql on collections", () => {
 
     expect(result2).toBeTruthy();
     expect(result2).toHaveLength(1);
+  });
+
+  test("Query with nested props filter / projection", async () => {
+    const sample = [{
+      parent: {
+        a: 1,
+        b: {
+          c: 2
+        }
+      }
+    }, {
+      some: {
+        prop: 1,
+        some: {
+          prop: 2
+        }
+      }
+    }];
+
+    const result = await select("parent.a").from(sample).run();
+
+    expect(result).toBeTruthy();
+    expect(result).toHaveLength(2);
+    expect(result[0]).toHaveProperty("parent.a", 1);
+    expect(result[1]).toHaveProperty("parent.a", null);
+
+    const result2 = await select("parent.a").from(sample).where(prop("parent.b.c", 2)).run();
+
+    expect(result2).toBeTruthy();
+    expect(result2).toHaveLength(1);
+    expect(result2[0]).toHaveProperty("parent.a");
   });
 });

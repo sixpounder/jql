@@ -29,7 +29,7 @@ const results = await select("tagName", "textContent")
       not(hasClass("bar"))
     )
   )
-  .lmit(10) // Fetch first 10 results
+  .limit(10) // Fetch first 10 results
   .offset(0) // Starting from the first one (the default)
   .run()
 ```
@@ -63,6 +63,32 @@ const results = await select()
       prop("name", /^obj/)
   )
   .run()
+```
+
+Projections and builtin filters support nested properties out of the box:
+
+```typescript
+const sample = [{
+    parent: {
+      a: 1,
+      b: {
+        c: 2
+      }
+    }
+  }, {
+    some: {
+      prop: 1,
+      some: {
+        prop: 2
+      }
+    }
+  }];
+
+  const result = await select("parent.a").from(sample).run();
+  // [{ parent: { a: 1 }}, { parent: { a: null }}]
+
+  const result = await select().from(sample).where(prop("parent.a", 1)).run();
+  // [{ parent: { a: 1, b: { c: 2 }}}]
 ```
 
 ### Custom query filters
