@@ -1,7 +1,7 @@
 import { isNull, notNull, prop } from "../src/filter/builtin";
 import { select } from "../src/query";
 
-describe("Testing obql on collections", () => {
+describe("Testing on collections", () => {
   test("Query no collection", async () => {
     const result = await select().from().run();
 
