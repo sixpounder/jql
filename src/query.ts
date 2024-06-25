@@ -1,6 +1,6 @@
 import { DatasourceRepository } from "./datasource";
 import { project } from "./datasource/internals";
-import { AnyObject, AnyRawDataSource, DataSource } from "./datasource/prelude";
+import { AnyObject, AnyDataSource, AsyncDataSource } from "./datasource/prelude";
 import {
   QueryFilterProtocol,
   and,
@@ -36,11 +36,11 @@ class Projection<TProject extends string | symbol> {
   }
 
   /**
-     * Adds a datasource for this query. This can be any javascript object, array or DOM node.
-     * @param rootNode - The node for this query data source
-     * @returns - the query with the data source added
-     */
-  public from(...sources: AnyRawDataSource[]): FilterableQuery<TProject> {
+   * Adds a datasource for this query. This can be any javascript object, array or DOM node.
+   * @param rootNode - The node for this query data source
+   * @returns - the query with the data source added
+   */
+  public from(...sources: AnyDataSource[]): FilterableQuery<TProject> {
     return new FilterableQuery<TProject>(this, sources);
   }
 
@@ -61,17 +61,17 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
   private sortRules: SortRule[] = [];
   private _filter: QueryFilterProtocol = identity;
 
-  constructor(private parent: Projection<TProject>, sources: AnyRawDataSource[]) {
+  constructor(private parent: Projection<TProject>, sources: AnyDataSource[]) {
     for (const source of sources) {
       this.datasource.add(source);
     }
   }
 
   /**
-     * Registers filters for this query
-     * @param conditions - the filters to append to the filter list
-     * @returns - The query with the filters appended
-     */
+   * Registers filters for this query
+   * @param conditions - the filters to append to the filter list
+   * @returns - The query with the filters appended
+   */
   public where(...conditions: AnyFilter[]): FilterableQuery<TProject> {
     if (conditions.length === 1 && isPredicate(conditions[0])) {
       this._filter = filter(conditions[0])
@@ -83,30 +83,30 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
   }
 
   /**
-     * Sets the limit of the result set size to `n`. `0` means no limit.
-     * @param n - the number of entries to limit to
-     * @returns - the query with a limit set
-     */
+   * Sets the limit of the result set size to `n`. `0` means no limit.
+   * @param n - the number of entries to limit to
+   * @returns - the query with a limit set
+   */
   public limit(n: number) {
     this.resultsLimit = n;
     return this;
   }
 
   /**
-     * Sets the offset of the result set to `n`.
-     * @param n - the offset index
-     * @returns - the query with an offset set
-     */
+   * Sets the offset of the result set to `n`.
+   * @param n - the offset index
+   * @returns - the query with an offset set
+   */
   public offset(n: number) {
     this.resultsOffset = n;
     return this;
   }
 
   /**
-     * Appends sort rules for this query
-     * @param comparator - The comparator function. See `Comparator`.
-     * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
-     */
+   * Appends sort rules for this query
+   * @param comparator - The comparator function. See `Comparator`.
+   * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
+   */
   public orderBy(field: string, direction: SortDirection = SortDirection.Ascending)
     : FilterableQuery<TProject> {
     this.sortRules.push({
@@ -122,9 +122,9 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
   }
 
   /**
-     * Executes the query
-     * @returns - The result set
-     */
+   * Executes the query
+   * @returns - The result set
+   */
   public async run<O extends { [K in TProject]: any }>(): Promise<O[]> {
     /* instanbul ignore next */
     if (isNull(this.datasource)) {
@@ -138,7 +138,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
     }
 
     let unprojectedNodes: AnyObject[] = [];
-    const datasources: DataSource<AnyObject>[] = this.datasource.merge();
+    const datasources: AsyncDataSource<AnyObject>[] = this.datasource.merge();
 
     // Extraction and filtering
     for (const source of datasources) {
@@ -174,11 +174,9 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
 }
 
 /**
- * Create a query. This specifies what elements you wanna select, just like
+ * Create a query. This specifies what properties you want to select, just like
  * a SQL projection
- * @param what - One or more strings identifying elements to select. This is effectively
- *               passed down to querySelectorAll in case of DOM sources, so you can use everything
- *               available to that API if you know how to.
+ * @param what - One or more strings identifying fields to select.
  * @returns - A `Query` to further customize
  */
 export const select = <P extends string | symbol>(...projections: P[]) => {

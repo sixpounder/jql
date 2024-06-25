@@ -4,7 +4,7 @@
 
 ## Features
 
-- 🤏 Small size: ~15kb gzipped
+- 🤏 Small size: ~9kb gzipped
 - ☝️ Only one small external dependency
 - 👣 Small footprint: no prototype polluting
 - 🤷 No reason behind it
@@ -20,6 +20,8 @@ npm i @storynode/jql
 ### DOM querying
 
 ```typescript
+import { select } from "@storynode/jql"
+
 const results = await select("tagName", "textContent")
   .from(document)
   .where(
@@ -116,6 +118,50 @@ const results = await select()
   .run()
 ```
 
+## Data sources
+
+### Joining sources
+
+By default, when more than one datasource is specified in a `from` method call, all datasources are fully joined with one another.
+
+If you want to perform different types of joins you can use one of the provided join operators
+
+For example:
+
+```typescript
+const orders = [{
+  orderId: 1,
+  userId: 1,
+  description: "Foo"
+}, {
+  orderId: 2,
+  userId: 2,
+  description: "Bar"
+}]
+
+const users = [{
+  id: 1,
+  userName: "Bob"
+}]
+
+const results = await select("user.id", "user.userName", "orders")
+  .from(
+    innerJoin(users, orders, (user, order) => user.id === order.userId))
+  )
+  .run()
+```
+
+would yield
+
+```typescript
+[{
+  id: 1,
+  userName: "Bob",
+  orderId: 1,
+  description: "Foo"
+}]
+```
+
 ### Mixing datasources
 
 You can mix DOM / collections / objects as datasources in a single query
@@ -148,4 +194,4 @@ A: It depends: if the filtering you need can be done with document.querySelector
 
 **Q: Does this support joining datasources?**
 
-A: Not yet, but it will eventually.
+A: ~~Not yet, but it will eventually~~ Yes 😈

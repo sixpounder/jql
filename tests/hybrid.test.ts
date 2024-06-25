@@ -3,8 +3,8 @@
  */
 
 import { and } from "../src/filter";
-import { select } from "../src/query";
 import { tagName } from "../src/filter/builtin";
+import { select } from "../src/query";
 import { SortDirection } from "../src/sort";
 
 const someDiv = document.createElement("div");
@@ -18,8 +18,8 @@ document.body.appendChild(someOtherDiv);
 const testObject = {
   tagName: "DIV",
   description: "I am a regular object",
-  priority: 1
-}
+  priority: 1,
+};
 
 describe("Testing hybrid queries", () => {
   test("Hybrid selection with no projection", async () => {
@@ -28,7 +28,7 @@ describe("Testing hybrid queries", () => {
       .run();
     expect(result).toHaveLength(3);
     expect(result[2]).toHaveProperty("description", "I am a regular object");
-  })
+  });
 
   test("Hybrid selection", async () => {
     const result = await select("tagName", "description")
@@ -37,7 +37,7 @@ describe("Testing hybrid queries", () => {
       .run();
     expect(result).toHaveLength(3);
     expect(result[2]).toHaveProperty("description", "I am a regular object");
-  })
+  });
 
   test("Hybrid selection with sorting", async () => {
     const result = await select("tagName", "description")
@@ -48,7 +48,7 @@ describe("Testing hybrid queries", () => {
       .run();
     expect(result).toHaveLength(3);
     expect(result[0]).toHaveProperty("description", "I am a regular object");
-  })
+  });
 
   test("Hybrid selection with descending sorting", async () => {
     const result = await select("tagName", "description", "priority")
@@ -58,5 +58,5 @@ describe("Testing hybrid queries", () => {
       .run();
     expect(result).toHaveLength(3);
     expect(result[2]).toHaveProperty("description", "I am a regular object");
-  })
-})
+  });
+});

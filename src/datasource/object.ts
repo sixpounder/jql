@@ -1,10 +1,10 @@
 import { isNull } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
-import { DataSource } from "./prelude";
+import { AsyncDataSource } from "./prelude";
 import { project } from "./internals";
 
-export class ObjectQueryDatasource<T extends object>
-implements DataSource<T> {
+export class ObjectDatasource<T extends object>
+implements AsyncDataSource<T> {
   constructor(private source: T, ..._args: any[]) {}
     
   async entries<U extends keyof T>(filter: QueryFilterProtocol | null, projection?: Array<U>):

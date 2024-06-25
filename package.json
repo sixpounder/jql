@@ -30,8 +30,8 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
-    "build:mjs": "esbuild ./src/index.ts --bundle --format=esm --outfile=dist/jql.mjs",
-    "build:cjs": "esbuild ./src/index.ts --bundle --format=cjs --outfile=dist/jql.cjs",
+    "build:mjs": "esbuild ./src/index.ts --bundle --metafile=\"./dist/metaesm.json\" --tree-shaking=true --format=esm --minify --outfile=dist/jql.mjs",
+    "build:cjs": "esbuild ./src/index.ts --bundle --metafile=\"./dist/metacjs.json\" --tree-shaking=true --format=cjs --minify --outfile=dist/jql.cjs",
     "copy-assets": "node build/assets.cjs dist && cp README.md dist/README.md",
     "lint": "eslint --fix .",
     "link": "npm run build && cd dist && npm link",
@@ -43,6 +43,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.8",
     "@types/jsdom": "^21.1.5",
+    "@types/lodash": "^4.17.5",
     "@types/lodash-es": "^4.17.12",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",

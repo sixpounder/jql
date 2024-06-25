@@ -11,8 +11,8 @@ export function project<T, U extends keyof T>(obj: T, projection: Array<U> | nul
   }
 
   const projectedObject: AnyObject = {};
-  for (let index = 0; index < projection.length; index++) {
-    const proj = projection[index];
+  for (let index = 0; index < projection!.length; index++) {
+    const proj = projection![index];
     set(projectedObject, proj, get(obj, proj, null));
   }
 

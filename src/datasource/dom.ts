@@ -1,17 +1,17 @@
 import { isNull } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
-import { DataSource } from "./prelude";
+import { AsyncDataSource } from "./prelude";
 import { project } from "./internals";
 
-export class DocumentQueryDatasource implements DataSource<Element> {
+export class DocumentDatasource implements AsyncDataSource<Pick<Element, keyof Element>> {
   public static matchDocumentQueryString(value: string): RegExpMatchArray | null {
     return value.match(/document\.(.*)/);
   }
 
-  public static fromString(value: string): DocumentQueryDatasource | null {
-    const matched = DocumentQueryDatasource.matchDocumentQueryString(value);
+  public static fromString(value: string): DocumentDatasource | null {
+    const matched = DocumentDatasource.matchDocumentQueryString(value);
     if (matched?.length) {
-      return new DocumentQueryDatasource(document, matched[1]);
+      return new DocumentDatasource(document, matched[1]);
     } else {
       return null;
     }
