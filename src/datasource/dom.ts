@@ -8,6 +8,10 @@ export class DocumentDatasource implements AsyncDataSource<Pick<Element, keyof E
     return value.match(/document\.(.*)/);
   }
 
+  __typeId(): string {
+    return "DocumentDatasource";
+  }
+
   public static fromString(value: string): DocumentDatasource | null {
     const matched = DocumentDatasource.matchDocumentQueryString(value);
     if (matched?.length) {

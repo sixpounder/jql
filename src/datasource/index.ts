@@ -30,17 +30,17 @@ export const datasource = (value: AnyDataSource, ...args: any[]): AsyncDataSourc
 }
 
 export class DatasourceRepository {
-  private sources: { alias: string | null, source: AsyncDataSource<AnyObject> }[] = [];
+  private sources: { alias: string | null, source: AsyncDataSource<unknown> }[] = [];
 
-  public add(source: AnyDataSource): void;
-  public add(source: AnyDataSource, alias?: string): void {
+  public add<T>(source: AsyncDataSource<T>): void;
+  public add<T>(source: AsyncDataSource<T>, alias?: string): void {
     this.sources.push({
       alias: alias ?? null,
       source: datasource(source)
     });
   }
 
-  public get(alias: string): AsyncDataSource<AnyObject> | undefined {
+  public get(alias: string): AsyncDataSource<unknown> | undefined {
     return this.sources.find(e => e.alias === alias)?.source;
   }
 
@@ -48,12 +48,12 @@ export class DatasourceRepository {
     return this.sources.length === 0;
   }
 
-  public entries(): AsyncDataSource<AnyObject>[] {
+  public entries(): AsyncDataSource<unknown>[] {
     return this.sources.map(e => e.source);
   }
 
-  public merge(): AsyncDataSource<AnyObject>[] {
-    let datasources: AsyncDataSource<AnyObject>[] = [];
+  public merge(): AsyncDataSource<unknown>[] {
+    let datasources: AsyncDataSource<unknown>[] = [];
     for (const ds of this.sources) {
       datasources = datasources.concat(ds.source);
     }

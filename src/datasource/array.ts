@@ -6,6 +6,10 @@ import { project } from "./internals";
 export class ArrayDatasource<T, K extends keyof T> implements AsyncDataSource<Pick<T, K>> {
   constructor(private source: AnyObject[], ..._args: any[]) {}
 
+  __typeId(): string {
+    return "ArrayDatasource";
+  }
+
   async entries(
     filter: QueryFilterProtocol | null,
     projection?: Array<K>): Promise<Iterable<Pick<T, K>>> {

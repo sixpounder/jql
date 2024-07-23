@@ -1,4 +1,4 @@
-import { DatasourceRepository } from "./datasource";
+import { datasource, DatasourceRepository } from "./datasource";
 import { project } from "./datasource/internals";
 import { AnyObject, AnyDataSource, AsyncDataSource } from "./datasource/prelude";
 import {
@@ -55,7 +55,7 @@ class Projection<TProject extends string | symbol> {
 }
 
 class FilterableQuery<TProject extends string | symbol> implements Executable<TProject> {
-  private datasource: DatasourceRepository = new DatasourceRepository();
+  private datasourceRepository: DatasourceRepository = new DatasourceRepository();
   private resultsLimit = 0;
   private resultsOffset = 0;
   private sortRules: SortRule[] = [];
@@ -63,7 +63,8 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
 
   constructor(private parent: Projection<TProject>, sources: AnyDataSource[]) {
     for (const source of sources) {
-      this.datasource.add(source);
+      const ds = datasource(source);
+      this.datasourceRepository.add(ds);
     }
   }
 
@@ -127,7 +128,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
    */
   public async run<O extends { [K in TProject]: any }>(): Promise<O[]> {
     /* instanbul ignore next */
-    if (isNull(this.datasource)) {
+    if (isNull(this.datasourceRepository)) {
       throw new Error("Cannot run a query without a source. Use .from(...) to set one.");
     }
 
@@ -138,12 +139,12 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
     }
 
     let unprojectedNodes: AnyObject[] = [];
-    const datasources: AsyncDataSource<AnyObject>[] = this.datasource.merge();
+    const datasources: AsyncDataSource<unknown>[] = this.datasourceRepository.merge();
 
     // Extraction and filtering
     for (const source of datasources) {
       for (const node of await source.entries(this.filter)) {
-        unprojectedNodes.push(node);
+        unprojectedNodes.push(node as AnyObject);
       }
     }
 
