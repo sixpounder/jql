@@ -1,4 +1,4 @@
-import { FullJoined, InnerJoined } from "./joined";
+import { FullJoined, InnerJoined, LeftJoined, RightJoined } from "./joined";
 import { AsyncDataSource, joinIdentity } from "./prelude";
 
 
@@ -40,4 +40,14 @@ export const join =
 export const innerJoin = 
     <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
       return new InnerJoined(a, b, pred);
+    }
+
+export const leftJoin = 
+    <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
+      return new LeftJoined(a, b, pred);
+    }
+
+export const rightJoin = 
+    <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
+      return new RightJoined(a, b, pred);
     }
