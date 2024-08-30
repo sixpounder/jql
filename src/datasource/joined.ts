@@ -1,6 +1,6 @@
 import { clone, merge } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
-import { BiPredicate, cartesian } from "./operators";
+import { BiPredicate, cartesian } from "./internals";
 import { AsyncDataSource, joinIdentity } from "./prelude";
 
 export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & U)>> {

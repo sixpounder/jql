@@ -8,8 +8,7 @@ const TAGNAME_PROP = "tagName";
  * @param expected - the tag name(s) to match the `tagName` against
  * @returns - A predicate that returns `true` if at least one `expected` name matches the element `tagName`
  * 
- * # Example
- * 
+ * @example
  * ```typescript
  * select().from("document").where(tagName("div")).run() // [{ tagName: "DIV", ... }, ...]
  * ```
@@ -41,8 +40,7 @@ export const tagName = (...expected: string[]): (el: any) => boolean => {
  * @param klass - the class to find
  * @returns - The predicate
  * 
- * # Example
- * 
+ * @example
  * ```typescript
  * select().from("document").where(hasClass("foo")).run() // [{ tagName: "DIV", ... }, ...]
  * 
@@ -71,8 +69,7 @@ export const hasClass = (...klass: string[]): (el: any) => boolean => {
  * @returns The built predicate. Note that the returned predicate only works on DOM elements. If the provided input
  * is not an `Element` this will always evaluate to `false`.
  * 
- * # Example
- * 
+ * @example
  * ```typescript
  * 
  * select().from("document").where(attr("src")).run()
@@ -104,8 +101,7 @@ export const attr = (attr: string, val?: string): (el: any) => boolean => {
  * @param expected - The value of the property (optional)
  * @returns - The predicate
  * 
- * # Example
- * 
+ * @example
  * ```typescript
  * select().from({ a: 1, b: 2}).where(prop("a")).run() // [{ a: 1, a: 2 }]
  * 
@@ -137,9 +133,7 @@ export const prop = (name: string, expected?: any): (el: any) => boolean => {
  * Asserts that a property with name `name` is present in the element being evaluated and has a null-ish value
  * @param name - The name of the property
  * @returns The built predicate
- * 
- * # Example
- * 
+ * @example
  * ```typescript
  * const sample = [{ a: 1 }, { a: 2 }, { a: null }];
  * const result = await select().from(sample).where(isNotNull("a")).run();
@@ -156,9 +150,7 @@ export const isNull = (name: string): (el: any) => boolean => {
  * Asserts that a property with name `name` is present in the element being evaluated and has a non null-ish value
  * @param name - The name of the property
  * @returns The built predicate
- * 
- * # Example
- * 
+ * @example
  * ```typescript
  * const sample = [{ a: 1 }, { a: 2 }, { a: null }];
  * const result = await select().from(sample).where(isNotNull("a")).run();

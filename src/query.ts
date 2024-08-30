@@ -179,6 +179,11 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
  * a SQL projection
  * @param what - One or more strings identifying fields to select.
  * @returns - A `Query` to further customize
+ * @example
+ * ```typescript
+ * select().from({ a: 1 }).run()
+ * select("a").from({ a: 1 }).run()
+ * ```
  */
 export function select<P extends string | symbol>(...projections: P[]): Projection<P> {
   return new Projection(...projections);

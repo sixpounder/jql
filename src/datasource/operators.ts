@@ -1,39 +1,6 @@
+import { BiPredicate } from "./internals";
 import { FullJoined, InnerJoined, LeftJoined, RightJoined } from "./joined";
-import { AsyncDataSource, joinIdentity } from "./prelude";
-
-
-/**
- * A predicate that consumes two inputs
- */
-export type BiPredicate<T, U> = (a: T, b: U) => boolean;
-
-export function* cartesian<T, U>(
-  lho: Iterable<T> | Generator<T>,
-  rho: Iterable<U> | Generator<U>,
-  predicate: BiPredicate<T, U> = joinIdentity
-): Generator<[T, U]> {
-  for (const l of lho) {
-    for (const r of rho) {
-      if (predicate(l, r)) {
-        yield [l, r];
-      }
-    }
-  }
-}
-
-export async function* cartesianAsync<T, U>(
-  lho: AsyncIterable<T>,
-  rho: AsyncIterable<U>,
-  predicate: BiPredicate<T, U> = joinIdentity
-): AsyncGenerator<[Awaited<T>, Awaited<U>]> {
-  for await (const l of lho) {
-    for await (const r of rho) {
-      if (predicate(l, r)) {
-        yield [l, r];
-      }
-    }
-  }
-}
+import { AsyncDataSource } from "./prelude";
 
 /**
  * Creates a datasource by joining two datasources on
