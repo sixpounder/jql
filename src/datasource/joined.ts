@@ -1,13 +1,13 @@
 import { clone, merge } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
-import { JoinPredicate, cartesian } from "./operators";
+import { BiPredicate, cartesian } from "./operators";
 import { AsyncDataSource, joinIdentity } from "./prelude";
 
 export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & U)>> {
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: JoinPredicate<T, U> = joinIdentity,
+    private joinCondition: BiPredicate<T, U> = joinIdentity,
   ) { }
 
   __typeId(): string {
@@ -76,7 +76,7 @@ export class InnerJoined<T, U> implements AsyncDataSource<Partial<T & U>> {
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: JoinPredicate<T, U> = joinIdentity,
+    private joinCondition: BiPredicate<T, U> = joinIdentity,
   ) { }
 
   __typeId(): string {
@@ -104,7 +104,7 @@ export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: JoinPredicate<T, U> = joinIdentity,
+    private joinCondition: BiPredicate<T, U> = joinIdentity,
   ) { }
 
   __typeId(): string {
@@ -148,7 +148,7 @@ export class RightJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: JoinPredicate<T, U> = joinIdentity,
+    private joinCondition: BiPredicate<T, U> = joinIdentity,
   ) { }
 
   __typeId(): string {

@@ -1,6 +1,6 @@
 {
   "name": "@storynode/jql",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A sql-like querying and aggregating interface for javascript objects and the DOM",
   "contributors": [
     {
@@ -36,7 +36,7 @@
     "lint": "eslint --fix .",
     "link": "npm run build && cd dist && npm link",
     "publish-package": "npm run build && npm test && cd dist && npm publish --access public",
-    "publish-package-jsr": "jsr publish",
+    "publish-package-jsr": "npm run build && npm test && jsr publish",
     "test": "jest --coverage"
   },
   "author": "Andrea Coronese <sixpounder@protonmail.com>",
