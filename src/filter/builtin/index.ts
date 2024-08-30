@@ -1,6 +1,8 @@
 import { compact, get, hasIn, isEmpty, isNil, isRegExp, isString, isUndefined } from "lodash-es";
 import { isElement } from "../../inspection";
 
+const TAGNAME_PROP = "tagName";
+
 /**
  * Returns a predicate that filters based on the `tagName` property of an object
  * @param expected - the tag name(s) to match the `tagName` against
@@ -21,8 +23,8 @@ export const tagName = (...expected: string[]): (el: any) => boolean => {
 
     // Check if el is an `Element` because that's faster than checking for own or
     // inherited properties, only do that is that's necessary
-    if (isElement(el) || hasIn(el, "tagName")) {
-      const prop = get(el, "tagName");
+    if (isElement(el) || hasIn(el, TAGNAME_PROP)) {
+      const prop = get(el, TAGNAME_PROP);
       if (isString(prop)) {
         return !isUndefined(compactExpected.find(t => t.toLowerCase() === prop.toLowerCase()));
       } else {

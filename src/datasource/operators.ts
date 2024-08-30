@@ -32,22 +32,34 @@ export async function* cartesianAsync<T, U>(
   }
 }
 
-export const join = 
-    <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
-      return new FullJoined(a, b, pred);
-    }
+export function join<T, U>(
+  a: AsyncDataSource<T>,
+  b: AsyncDataSource<U>,
+  pred?: JoinPredicate<T, U>
+): FullJoined<T, U> {
+  return new FullJoined(a, b, pred);
+}
 
-export const innerJoin = 
-    <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
-      return new InnerJoined(a, b, pred);
-    }
+export function innerJoin<T, U>(
+  a: AsyncDataSource<T>,
+  b: AsyncDataSource<U>,
+  pred?: JoinPredicate<T, U>
+): InnerJoined<T, U> {
+  return new InnerJoined(a, b, pred);
+}
 
-export const leftJoin = 
-    <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
-      return new LeftJoined(a, b, pred);
-    }
+export function leftJoin<T, U>(
+  a: AsyncDataSource<T>,
+  b: AsyncDataSource<U>,
+  pred?: JoinPredicate<T, U>
+): LeftJoined<T, U> {
+  return new LeftJoined(a, b, pred);
+}
 
-export const rightJoin = 
-    <T, U>(a: AsyncDataSource<T>, b: AsyncDataSource<U>, pred?: JoinPredicate<T, U>) => {
-      return new RightJoined(a, b, pred);
-    }
+export function rightJoin<T, U>(
+  a: AsyncDataSource<T>,
+  b: AsyncDataSource<U>,
+  pred?: JoinPredicate<T, U>
+): RightJoined<T, U> {
+  return new RightJoined(a, b, pred);
+}

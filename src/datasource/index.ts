@@ -1,8 +1,9 @@
 import { isString } from "lodash-es";
-import { ObjectDatasource, ArrayDatasource } from ".";
 import { isParentNode } from "../inspection";
 import { DocumentDatasource } from "./dom";
 import { AnyObject, AnyDataSource, AsyncDataSource, isDataSource } from "./prelude";
+import { ArrayDatasource } from "./array";
+import { ObjectDatasource } from "./object";
 
 export * from "./array";
 export * from "./dom";

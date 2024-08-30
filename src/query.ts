@@ -44,7 +44,7 @@ class Projection<TProject extends string | symbol> {
     return new FilterableQuery<TProject>(this, sources);
   }
 
-  public get projection() {
+  public get projection(): TProject[] | null {
     return this.projectionSpec;
   }
 
@@ -88,7 +88,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
    * @param n - the number of entries to limit to
    * @returns - the query with a limit set
    */
-  public limit(n: number) {
+  public limit(n: number): FilterableQuery<TProject> {
     this.resultsLimit = n;
     return this;
   }
@@ -98,7 +98,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
    * @param n - the offset index
    * @returns - the query with an offset set
    */
-  public offset(n: number) {
+  public offset(n: number): FilterableQuery<TProject> {
     this.resultsOffset = n;
     return this;
   }
@@ -118,7 +118,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
     return this;
   }
 
-  public get filter() {
+  public get filter(): QueryFilterProtocol {
     return this._filter;
   }
 
@@ -180,7 +180,6 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
  * @param what - One or more strings identifying fields to select.
  * @returns - A `Query` to further customize
  */
-export const select = <P extends string | symbol>(...projections: P[]) => {
-  const query: Projection<P> = new Projection(...projections);
-  return query;
+export function select<P extends string | symbol>(...projections: P[]): Projection<P> {
+  return new Projection(...projections);
 }
