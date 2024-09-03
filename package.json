@@ -22,8 +22,8 @@
   },
   "exports": {
     ".": {
-      "types": "./lib/jql.d.ts",
-      "main": "./lib/jql.js",
+      "types": "./lib/mod.d.ts",
+      "main": "./lib/mod.js",
       "module": "./jql.mjs",
       "default": "./jql.mjs"
     }
@@ -40,7 +40,7 @@
     "test": "jest --coverage"
   },
   "author": "Andrea Coronese <sixpounder@protonmail.com>",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "devDependencies": {
     "@types/jest": "^29.5.8",
     "@types/jsdom": "^21.1.5",
