@@ -17,6 +17,12 @@
 npm i @storynode/jql
 ```
 
+### Generating documentation
+
+```sh
+npm run build:docs
+```
+
 ### DOM querying
 
 ```typescript

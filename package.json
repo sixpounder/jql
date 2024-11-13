@@ -32,6 +32,7 @@
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
     "build:mjs": "esbuild ./src/mod.ts --bundle --metafile=\"./dist/metaesm.json\" --tree-shaking=true --format=esm --minify --outfile=dist/jql.mjs",
     "build:cjs": "esbuild ./src/mod.ts --bundle --metafile=\"./dist/metacjs.json\" --tree-shaking=true --format=cjs --minify --outfile=dist/jql.cjs",
+    "build:docs": "typedoc",
     "copy-assets": "node build/assets.cjs dist && cp README.md dist/README.md",
     "lint": "eslint --fix .",
     "link": "npm run build && cd dist && npm link",
@@ -60,6 +61,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.17.21",
+    "typedoc": "^0.26.11"
   }
 }
