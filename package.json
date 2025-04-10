@@ -58,11 +58,11 @@
     "lodash": "^4.17.21",
     "rimraf": "^5.0.5",
     "ts-jest": "^29.1.1",
+    "typedoc": "^0.26.11",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "lodash-es": "^4.17.21",
-    "typedoc": "^0.26.11"
+    "lodash-es": "^4.17.21"
   },
   "files": ["dist/**", "README.md", "LICENCE"]
 }
