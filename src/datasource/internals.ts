@@ -25,10 +25,10 @@ export function project<T, U extends keyof T>(obj: T, projection: Array<U> | nul
 }
 
 export function* cartesian<T, U>(
-  lho: Iterable<T> | Generator<T>,
-  rho: Iterable<U> | Generator<U>,
+  lho: Iterable<T>,
+  rho: Iterable<U>,
   predicate: BiPredicate<T, U> = joinIdentity
-): Generator<[T, U]> {
+): Iterable<[T, U]> {
   for (const l of lho) {
     for (const r of rho) {
       if (predicate(l, r)) {
@@ -42,7 +42,7 @@ export async function* cartesianAsync<T, U>(
   lho: AsyncIterable<T>,
   rho: AsyncIterable<U>,
   predicate: BiPredicate<T, U> = joinIdentity
-): AsyncGenerator<[Awaited<T>, Awaited<U>]> {
+): AsyncIterable<[Awaited<T>, Awaited<U>]> {
   for await (const l of lho) {
     for await (const r of rho) {
       if (predicate(l, r)) {
