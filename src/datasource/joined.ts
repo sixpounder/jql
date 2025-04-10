@@ -1,4 +1,4 @@
-import { clone, merge } from "lodash-es";
+import { clone } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
 import { BiPredicate, cartesian } from "./internals";
 import { AsyncDataSource, joinIdentity } from "./prelude";
@@ -36,7 +36,7 @@ export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & 
       
       for (const rItem of rh) {
         if (this.joinCondition(lItem, rItem)) {
-          items.push(merge(clone(lItem), clone(rItem)));
+          items.push({ ...clone(lItem), ...clone(rItem) });
           matched = true;
           matchedFromRight.add(j)
         }
@@ -93,7 +93,7 @@ export class InnerJoined<T, U> implements AsyncDataSource<Partial<T & U>> {
       this.rh.entries(filter),
     ]);
     for (const [l, r] of cartesian(lh, rh, this.joinCondition)) {
-      items.push(merge(clone(l), r));
+      items.push({ ...clone(l), ...r });
     }
 
     return items;
@@ -128,7 +128,7 @@ export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>
       for (const r of rh) {
         if (this.joinCondition(l, r)) {
           items.push(
-            merge(clone(l), this.joinCondition(l, r) ? r : {}) as T & Partial<U>,
+            { ...clone(l), ...this.joinCondition(l, r) ? r : {} } as T & Partial<U>,
           );
 
           matched = true;
@@ -172,7 +172,7 @@ export class RightJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>
       for (const l of lh) {
         if (this.joinCondition(l, r)) {
           items.push(
-            merge(clone(l), this.joinCondition(l, r) ? r : {}) as T & Partial<U>,
+            { ...clone(l), ...this.joinCondition(l, r) ? r : {} } as T & Partial<U>,
           );
 
           matched = true;
