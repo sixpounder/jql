@@ -1,6 +1,6 @@
 {
   "name": "@storynode/jql",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A sql-like querying and aggregating interface for javascript objects and the DOM",
   "contributors": [
     {
@@ -30,8 +30,8 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
-    "build:mjs": "esbuild ./src/mod.ts --bundle --metafile=\"./dist/metaesm.json\" --tree-shaking=true --format=esm --minify --outfile=dist/jql.mjs",
-    "build:cjs": "esbuild ./src/mod.ts --bundle --metafile=\"./dist/metacjs.json\" --tree-shaking=true --format=cjs --minify --outfile=dist/jql.cjs",
+    "build:mjs": "esbuild ./src/mod.ts --sourcemap --bundle --metafile=\"./dist/metaesm.json\" --tree-shaking=true --format=esm --minify --outfile=dist/jql.mjs",
+    "build:cjs": "esbuild ./src/mod.ts --sourcemap --bundle --metafile=\"./dist/metacjs.json\" --tree-shaking=true --format=cjs --minify --outfile=dist/jql.cjs",
     "build:docs": "typedoc",
     "copy-assets": "node build/assets.cjs dist && cp README.md dist/README.md",
     "lint": "eslint --fix .",
