@@ -6,14 +6,21 @@ on:
       - main
 
 jobs:
-  build:
+  build-docs:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [20.x]
     steps:
       - uses: actions/checkout@v4
-
-      - name: Generate documentation static site
-        run: npm run build:docs
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:docs
 
       - name: Upload static files as artifact
         id: deployment
@@ -22,12 +29,16 @@ jobs:
           path: docs/
 
   # Deployment job
-  deploy:
+  deploy-docs:
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-docs
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
