@@ -64,5 +64,5 @@
   "dependencies": {
     "lodash-es": "^4.17.21"
   },
-  "files": ["dist/**", "README.md", "LICENCE"]
+  "files": ["dist/**", "README.md", "LICENSE"]
 }
