@@ -1,6 +1,6 @@
 {
   "name": "@storynode/jql",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "A sql-like querying and aggregating interface for javascript objects and the DOM",
   "contributors": [
     {
@@ -22,22 +22,22 @@
   },
   "exports": {
     ".": {
-      "types": "./lib/mod.d.ts",
-      "main": "./lib/mod.js",
-      "module": "./jql.mjs",
-      "default": "./jql.mjs"
+      "types": "./dist/types/mod.d.ts",
+      "main": "./dist/jql.cjs",
+      "module": "./dist/jql.mjs",
+      "default": "./dist/jql.mjs"
     }
   },
   "scripts": {
-    "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs && npm run copy-assets",
-    "build:mjs": "esbuild ./src/mod.ts --sourcemap --bundle --metafile=\"./dist/metaesm.json\" --tree-shaking=true --format=esm --minify --outfile=dist/jql.mjs",
-    "build:cjs": "esbuild ./src/mod.ts --sourcemap --bundle --metafile=\"./dist/metacjs.json\" --tree-shaking=true --format=cjs --minify --outfile=dist/jql.cjs",
+    "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs",
+    "build:mjs": "esbuild ./src/mod.ts --sourcemap --bundle --tree-shaking=true --format=esm --minify --outfile=dist/jql.mjs",
+    "build:cjs": "esbuild ./src/mod.ts --sourcemap --bundle --tree-shaking=true --format=cjs --minify --outfile=dist/jql.cjs",
     "build:docs": "typedoc",
-    "copy-assets": "node build/assets.cjs dist && cp README.md dist/README.md",
     "lint": "eslint --fix .",
     "link": "npm run build && cd dist && npm link",
-    "publish-package": "npm run build && npm test && cd dist && npm publish --access public",
-    "publish-package-jsr": "npm run build && npm test && jsr publish",
+    "check-versions": "node build/align-versions.cjs",
+    "publish-package": "npm run check-versions && npm run build && npm test && npm publish --access public",
+    "publish-package-jsr": "npm run check-versions && npm run build && npm test && jsr publish",
     "test": "jest --coverage"
   },
   "author": "Andrea Coronese <sixpounder@protonmail.com>",
@@ -63,5 +63,6 @@
   "dependencies": {
     "lodash-es": "^4.17.21",
     "typedoc": "^0.26.11"
-  }
+  },
+  "files": ["dist/**", "README.md", "LICENCE"]
 }
