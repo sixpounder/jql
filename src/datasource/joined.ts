@@ -3,6 +3,9 @@ import { QueryFilterProtocol } from "../filter";
 import { BiPredicate, cartesian } from "./internals";
 import { AsyncDataSource, joinIdentity } from "./prelude";
 
+/**
+ * An `AsyncDataSource` that is the full join of two other datasources
+ */
 export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & U)>> {
   constructor(
     private lh: AsyncDataSource<T>,
@@ -72,6 +75,9 @@ export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & 
   }
 }
 
+/**
+ * An `AsyncDataSource` that is the inner join of two other datasources
+ */
 export class InnerJoined<T, U> implements AsyncDataSource<Partial<T & U>> {
   constructor(
     private lh: AsyncDataSource<T>,
@@ -100,6 +106,9 @@ export class InnerJoined<T, U> implements AsyncDataSource<Partial<T & U>> {
   }
 }
 
+/**
+ * An `AsyncDataSource` that is the left join of two other datasources
+ */
 export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>> {
   constructor(
     private lh: AsyncDataSource<T>,
@@ -144,6 +153,9 @@ export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>
   }
 }
 
+/**
+ * An `AsyncDataSource` that is the right join of two other datasources
+ */
 export class RightJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>> {
   constructor(
     private lh: AsyncDataSource<T>,

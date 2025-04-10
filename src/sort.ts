@@ -1,11 +1,17 @@
 import { sortBy } from "lodash-es";
 
+/**
+ * Defines ordering relation between two entities
+ */
 export enum Ordering {
     Before = -1,
     Same = 0,
     After = 1
 }
 
+/**
+ * Defines a sort direction
+ */
 export enum SortDirection {
     Ascending,
     Descending

@@ -1,10 +1,15 @@
 import { isPromise, promisify } from "../inspection";
 
+export * from "./builtin";
+
 /**
  * A predicate applied to an `Element`
  */
 export type QueryFilterPredicate = (el: Element) => boolean;
 
+/**
+ * An async predicate applied to an `Element`
+ */
 export type QueryFilterPredicateAsync = (el: Element) => Promise<boolean>;
 
 export type AnyFilter = QueryFilterProtocol | QueryFilterPredicate | QueryFilterPredicateAsync;

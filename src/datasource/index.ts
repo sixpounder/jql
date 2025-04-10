@@ -5,10 +5,14 @@ import { AnyObject, AnyDataSource, AsyncDataSource, isDataSource } from "./prelu
 import { ArrayDatasource } from "./array";
 import { ObjectDatasource } from "./object";
 
+export * from "./prelude";
 export * from "./array";
 export * from "./dom";
 export * from "./object";
 export * from "./operators";
+export * from "./joined";
+
+export { BiPredicate } from "./internals";
 
 /**
  * Transforms a value into a datasource

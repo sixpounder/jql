@@ -19,16 +19,19 @@ export enum FilterChainType {
 }
 
 /**
- * Implemented by types that can be `exec`uted at some point
+ * Implemented by types that can be `run`ned at some point
  */
-interface Executable<P extends string | symbol> {
+export interface Executable<P extends string | symbol> {
     /**
      * Executes the query and return a result
      */
     run<O extends { [K in P]: any }>(): Promise<O[]>
 }
 
-class Projection<TProject extends string | symbol> {
+/**
+ * Represents a projection of some fields on a source
+ */
+export class Projection<TProject extends string | symbol> {
   private projectionSpec: TProject[] | null = null;
 
   constructor(...projectionSpec: TProject[]) {
@@ -37,8 +40,8 @@ class Projection<TProject extends string | symbol> {
 
   /**
    * Adds a datasource for this query. This can be any javascript object, array or DOM node.
-   * @param rootNode - The node for this query data source
-   * @returns - the query with the data source added
+   * @param sources - Any number of data sources to include in the query
+   * @returns - the query with the data source(s) added
    */
   public from(...sources: AnyDataSource[]): FilterableQuery<TProject> {
     return new FilterableQuery<TProject>(this, sources);
@@ -54,7 +57,11 @@ class Projection<TProject extends string | symbol> {
   }
 }
 
-class FilterableQuery<TProject extends string | symbol> implements Executable<TProject> {
+/**
+ * Represents a query that has data sources attached to it, and is now filterable,
+ * sortable, runnable etc...
+ */
+export class FilterableQuery<TProject extends string | symbol> implements Executable<TProject> {
   private datasourceRepository: DatasourceRepository = new DatasourceRepository();
   private resultsLimit = 0;
   private resultsOffset = 0;
@@ -105,7 +112,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
 
   /**
    * Appends sort rules for this query
-   * @param comparator - The comparator function. See `Comparator`.
+   * @param field - The field to sort by
    * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
    */
   public orderBy(field: string, direction: SortDirection = SortDirection.Ascending)
@@ -177,7 +184,7 @@ class FilterableQuery<TProject extends string | symbol> implements Executable<TP
 /**
  * Create a query. This specifies what properties you want to select, just like
  * a SQL projection
- * @param what - One or more strings identifying fields to select.
+ * @param projections - One or more strings identifying fields to select.
  * @returns - A `Query` to further customize
  * @example
  * ```typescript
