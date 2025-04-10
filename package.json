@@ -1,6 +1,6 @@
 {
   "name": "@storynode/jql",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "A sql-like querying and aggregating interface for javascript objects and the DOM",
   "contributors": [
     {
