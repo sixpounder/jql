@@ -6,20 +6,21 @@ import { AsyncDataSource, joinIdentity } from "./prelude";
 /**
  * An `AsyncDataSource` that is the full join of two other datasources
  */
-export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & U)>> {
+export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & U)>>
+{
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: BiPredicate<T, U> = joinIdentity,
-  ) { }
+    private joinCondition: BiPredicate<T, U> = joinIdentity
+  ) {}
 
   __typeId(): string {
     return "FullJoined";
   }
 
   async entries(
-    filter: QueryFilterProtocol | null,
-    _projection?: Array<keyof T>,
+    filter?: QueryFilterProtocol,
+    _projection?: Array<keyof T>
   ): Promise<Iterable<Pick<T & U, keyof (T & U)>>> {
     const items: Pick<T & U, keyof (T & U)>[] = [];
     const [lh, rh] = await Promise.all([
@@ -30,18 +31,18 @@ export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & 
     // Keep track of which items have been matched
     const matchedFromLeft = new Set<number>();
     const matchedFromRight = new Set<number>();
-    
+
     let i = 0;
-    
+
     for (const lItem of lh) {
       let matched = false;
       let j = 0;
-      
+
       for (const rItem of rh) {
         if (this.joinCondition(lItem, rItem)) {
           items.push({ ...clone(lItem), ...clone(rItem) });
           matched = true;
-          matchedFromRight.add(j)
+          matchedFromRight.add(j);
         }
         j++;
       }
@@ -82,16 +83,16 @@ export class InnerJoined<T, U> implements AsyncDataSource<Partial<T & U>> {
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: BiPredicate<T, U> = joinIdentity,
-  ) { }
+    private joinCondition: BiPredicate<T, U> = joinIdentity
+  ) {}
 
   __typeId(): string {
     return "InnerJoined";
   }
 
   async entries(
-    filter: QueryFilterProtocol | null,
-    _projection?: Array<keyof T>,
+    filter?: QueryFilterProtocol,
+    _projection?: Array<keyof T>
   ): Promise<Iterable<Partial<T & U>>> {
     const items: Partial<T & U>[] = [];
     const [lh, rh] = await Promise.all([
@@ -109,20 +110,22 @@ export class InnerJoined<T, U> implements AsyncDataSource<Partial<T & U>> {
 /**
  * An `AsyncDataSource` that is the left join of two other datasources
  */
-export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>> {
+export class LeftJoined<T, U>
+implements AsyncDataSource<Partial<T & Partial<U>>>
+{
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: BiPredicate<T, U> = joinIdentity,
-  ) { }
+    private joinCondition: BiPredicate<T, U> = joinIdentity
+  ) {}
 
   __typeId(): string {
     return "LeftJoined";
   }
 
   async entries(
-    filter: QueryFilterProtocol | null,
-    _projection?: Array<keyof T>,
+    filter?: QueryFilterProtocol,
+    _projection?: Array<keyof T>
   ): Promise<Iterable<Partial<T & Partial<U>>>> {
     const [lh, rh] = await Promise.all([
       this.lh.entries(filter),
@@ -136,16 +139,17 @@ export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>
 
       for (const r of rh) {
         if (this.joinCondition(l, r)) {
-          items.push(
-            { ...clone(l), ...this.joinCondition(l, r) ? r : {} } as T & Partial<U>,
-          );
+          items.push({
+            ...clone(l),
+            ...(this.joinCondition(l, r) ? r : {}),
+          } as T & Partial<U>);
 
           matched = true;
         }
       }
 
       if (!matched) {
-        items.push(clone(l) as T & Partial<U>)
+        items.push(clone(l) as T & Partial<U>);
       }
     }
 
@@ -156,20 +160,22 @@ export class LeftJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>
 /**
  * An `AsyncDataSource` that is the right join of two other datasources
  */
-export class RightJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>>> {
+export class RightJoined<T, U>
+implements AsyncDataSource<Partial<T & Partial<U>>>
+{
   constructor(
     private lh: AsyncDataSource<T>,
     private rh: AsyncDataSource<U>,
-    private joinCondition: BiPredicate<T, U> = joinIdentity,
-  ) { }
+    private joinCondition: BiPredicate<T, U> = joinIdentity
+  ) {}
 
   __typeId(): string {
     return "RightJoined";
   }
 
   async entries(
-    filter: QueryFilterProtocol | null,
-    _projection?: Array<keyof T>,
+    filter?: QueryFilterProtocol,
+    _projection?: Array<keyof T>
   ): Promise<Iterable<Partial<T & Partial<U>>>> {
     const [lh, rh] = await Promise.all([
       this.lh.entries(filter),
@@ -183,16 +189,17 @@ export class RightJoined<T, U> implements AsyncDataSource<Partial<T & Partial<U>
 
       for (const l of lh) {
         if (this.joinCondition(l, r)) {
-          items.push(
-            { ...clone(l), ...this.joinCondition(l, r) ? r : {} } as T & Partial<U>,
-          );
+          items.push({
+            ...clone(l),
+            ...(this.joinCondition(l, r) ? r : {}),
+          } as T & Partial<U>);
 
           matched = true;
         }
       }
 
       if (!matched) {
-        items.push(clone(r) as T & Partial<U>)
+        items.push(clone(r) as T & Partial<U>);
       }
     }
 

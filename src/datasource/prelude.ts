@@ -14,17 +14,27 @@ export interface AsyncDataSource<T> {
    * @returns A tuple consisting of an iterable over the entries for this data source and a boolean
    * indicating whether the filter was applied eagerly or not.
    */
-  entries(filter: QueryFilterProtocol | null, projection?: Array<keyof T>): Promise<Iterable<T>>;
+  entries(
+    filter?: QueryFilterProtocol,
+    projection?: Array<keyof T>
+  ): Promise<Iterable<T>>;
 }
 
 export const isDataSource = <T>(obj: any): obj is AsyncDataSource<T> => {
-  return hasIn(obj, "entries") && hasIn(obj, "__typeId");
-}
+  return hasIn(obj, "__typeId") && hasIn(obj, "entries");
+};
 
 export const joinIdentity = (..._args: any[]): boolean => true;
 
 export type AnyObject = Record<string | number | symbol, any>;
 
-export type AnyDataSource = AsyncDataSource<any> | AnyObject | AnyObject[] | ParentNode | string;
+export type AnyDataSource =
+  | AsyncDataSource<any>
+  | AnyObject
+  | AnyObject[]
+  | ParentNode
+  | string;
 
-export type QueryResult = { [K: string]: Record<string | number | symbol, any> }
+export type QueryResult = {
+  [K: string]: Record<string | number | symbol, any>;
+};

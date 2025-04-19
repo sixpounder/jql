@@ -1,4 +1,4 @@
-import { isNull } from "lodash-es";
+import { isUndefined } from "lodash-es";
 import { QueryFilterProtocol } from "../filter";
 import { AsyncDataSource } from "./prelude";
 import { project } from "./internals";
@@ -23,10 +23,10 @@ export class DocumentDatasource implements AsyncDataSource<Pick<Element, keyof E
 
   constructor(private source: ParentNode, private selector: string) {}
 
-  async entries<U extends keyof Element>(filter: QueryFilterProtocol | null, projection: Array<U>):
+  async entries<U extends keyof Element>(filter?: QueryFilterProtocol, projection?: Array<U>):
     Promise<Iterable<Pick<Element, U>>> {
         
-    const pickResults = async (elements: NodeList, filter: QueryFilterProtocol, projection: Array<U>) => {
+    const pickResults = async (elements: NodeList, filter: QueryFilterProtocol, projection?: Array<U>) => {
       const filteredOutput: Array<Pick<Element, U>> = [];
       for (let index = 0; index < elements.length; index++) {
         const element = elements.item(index) as Node;
@@ -38,7 +38,7 @@ export class DocumentDatasource implements AsyncDataSource<Pick<Element, keyof E
       return filteredOutput;
     };
 
-    return isNull(filter)
+    return isUndefined(filter)
       ? this.source.querySelectorAll(this.selector)
       : await pickResults(this.source.querySelectorAll(this.selector), filter, projection);
   }
