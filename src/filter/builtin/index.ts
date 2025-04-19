@@ -91,7 +91,7 @@ export const attr = (attr: string, val?: string): (el: any) => boolean => {
 
     return isUndefined(val)
       ? el.hasAttribute(attr)
-      : el.attributes.getNamedItem(attr)?.value === val ?? false;
+      : el.attributes.getNamedItem(attr)?.value === val || false;
   };
 }
 
