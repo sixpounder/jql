@@ -4,7 +4,7 @@
  * @returns - true or false depending on value being an `Element` or not. Also does type cohercion.
  */
 export const isElement = (value: any): value is Element => {
-  return value instanceof Element;
+  return typeof Element !== "undefined" && value instanceof Element;
 }
 
 /**

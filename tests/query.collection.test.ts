@@ -18,6 +18,16 @@ describe("Testing on collections", () => {
     expect(result).toHaveLength(2);
   });
 
+  test("Query simple collection with type checking", async () => {
+    interface ElementType { a: number }
+    const sample = [{a: 1}, {a: 2}];
+
+    const result = await select().from(sample).where((el: ElementType) => el.a === 1).run();
+
+    expect(result).toBeTruthy();
+    expect(result).toHaveLength(1);
+  });
+
   test("Query simple collection with filtering", async () => {
     const sample = [{a: 1}, {a: 2}, {a: null}];
 

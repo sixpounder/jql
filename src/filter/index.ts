@@ -5,12 +5,12 @@ export * from "./builtin";
 /**
  * A predicate applied to an `Element`
  */
-export type QueryFilterPredicate = (el: Element) => boolean;
+export type QueryFilterPredicate = <T>(el: T) => boolean;
 
 /**
  * An async predicate applied to an `Element`
  */
-export type QueryFilterPredicateAsync = (el: Element) => Promise<boolean>;
+export type QueryFilterPredicateAsync = <T>(el: T) => Promise<boolean>;
 
 export type AnyFilter = QueryFilterProtocol | QueryFilterPredicate | QueryFilterPredicateAsync;
 
@@ -25,10 +25,10 @@ export enum QueryFilterChainOperator {
 }
 
 /**
- * Implemented by types who wants to apply some kind of filter to an `Element`
+ * Implemented by types who wants to apply some kind of filter to an element of a datasource
  */
 export interface QueryFilterProtocol {
-    apply(el: any): Promise<boolean>
+    apply<T>(el: T): Promise<boolean>
 }
 
 /**
@@ -67,7 +67,7 @@ export class QueryFilter implements QueryFilterProtocol {
      * @param element - the evaluated element
      * @returns - A promise of the boolean resolved by this filter
      */
-  async apply(element: Element): Promise<boolean> {
+  async apply<T>(element: T): Promise<boolean> {
     let provisional;
     if (this.chainOp === QueryFilterChainOperator.Union) {
       provisional = false;
@@ -95,7 +95,7 @@ export class QueryFilter implements QueryFilterProtocol {
  * @param el - the element of the predicate
  * @returns - a promise of the boolean resolved by the predicate
  */
-const callFilter = async (fn: AnyFilter, el: Element): Promise<boolean> => {
+const callFilter = async <T>(fn: AnyFilter, el: T): Promise<boolean> => {
 
   return isPredicate(fn)
     ? promisify<boolean>(fn)(el)

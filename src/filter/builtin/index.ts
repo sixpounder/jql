@@ -13,7 +13,7 @@ const TAGNAME_PROP = "tagName";
  * select().from("document").where(tagName("div")).run() // [{ tagName: "DIV", ... }, ...]
  * ```
  */
-export const tagName = (...expected: string[]): (el: any) => boolean => {
+export const tagName = (...expected: string[]): <T>(el: T) => boolean => {
   return (el) => {
     const compactExpected = compact(expected);
     if (isNil(compactExpected) || isEmpty(compactExpected)) {
@@ -83,7 +83,7 @@ export const hasClass = (...klass: string[]): (el: any) => boolean => {
  * 
  * ```
  */
-export const attr = (attr: string, val?: string): (el: any) => boolean => {
+export const attr = <V>(attr: string, val?: V): (el: any) => boolean => {
   return (el) => {
     if (!isElement(el)) {
       return false;
@@ -114,13 +114,13 @@ export const attr = (attr: string, val?: string): (el: any) => boolean => {
  * select().from({ name: "Some value" }).where(prop("name", /^Some/)).run() // [{ name: "Some value" }]
  * ```
  */
-export const prop = (name: string, expected?: any): (el: any) => boolean => {
+export const prop = <V>(name: string, expected?: V): <T>(el: T) => boolean => {
   return (el) => {
     if (isNil(expected)) {
       return hasIn(el, name);
     } else {
       const value = get(el, name, null);
-      if (isRegExp(expected)) {
+      if (isRegExp(expected) && isString(value)) {
         return expected.test(value);
       } else {
         return value === expected;

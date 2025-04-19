@@ -39,7 +39,7 @@ describe("Testing DOM", () => {
 
     const queryResult = await select("*")
       .from(document)
-      .where(node => {
+      .where((node: Element) => {
         return node.classList.contains("wolf");
       })
       .run();
@@ -49,7 +49,7 @@ describe("Testing DOM", () => {
 
     const queryResult2 = await select("*")
       .from("document.div")
-      .where(node => node.classList.contains("sheep"))
+      .where((node: Element) => node.classList.contains("sheep"))
       .run();
         
     expect(queryResult2).toBeInstanceOf(Array);
@@ -59,7 +59,7 @@ describe("Testing DOM", () => {
   test("Single async condition", async () => {
     const queryResult = await select("*")
       .from(document)
-      .where(async node => {
+      .where(async (node: Element) => {
         await sleep(100);
         return node.classList.contains("sheep");
       })
@@ -90,10 +90,10 @@ describe("Testing DOM", () => {
     const queryResult = await select("*")
       .from(document)
       .where(
-        not(node => node.classList.contains("wolf")),
+        not((node: Element) => node.classList.contains("wolf")),
         or(
-          node => node.classList.contains("leet"),
-          node => node.classList.contains("sheep")
+          (node: Element) => node.classList.contains("leet"),
+          (node: Element) => node.classList.contains("sheep")
         )
       )
       .run();
