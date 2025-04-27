@@ -1,6 +1,6 @@
 import { datasource, DatasourceRepository } from "./datasource";
 import { project } from "./datasource/internals";
-import { AnyObject, AnyDataSource, AsyncDataSource } from "./datasource/prelude";
+import { AnyObject, RawDataSource, AsyncDataSource, AnyDataSource } from "./datasource/prelude";
 import {
   QueryFilterProtocol,
   and,
@@ -68,7 +68,7 @@ export class FilterableQuery<TProject extends string | symbol> implements Execut
   private sortRules: SortRule[] = [];
   private _filter: QueryFilterProtocol = identity;
 
-  constructor(private parent: Projection<TProject>, sources: AnyDataSource[]) {
+  constructor(private parent: Projection<TProject>, sources: RawDataSource<unknown>[]) {
     for (const source of sources) {
       const ds = datasource(source);
       this.datasourceRepository.add(ds);

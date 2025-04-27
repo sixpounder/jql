@@ -6,7 +6,7 @@ import { AsyncDataSource, joinIdentity } from "./prelude";
 /**
  * An `AsyncDataSource` that is the full join of two other datasources
  */
-export class FullJoined<T, U> implements AsyncDataSource<Pick<T & U, keyof (T & U)>>
+export class FullJoined<T, U> implements AsyncDataSource<T & U, keyof (T & U)>
 {
   constructor(
     private lh: AsyncDataSource<T>,

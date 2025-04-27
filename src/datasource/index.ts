@@ -1,7 +1,7 @@
-import { isString } from "lodash-es";
+import { isObjectLike, isString } from "lodash-es";
 import { isParentNode } from "../inspection";
 import { DocumentDatasource } from "./dom";
-import { AnyObject, AnyDataSource, AsyncDataSource, isDataSource } from "./prelude";
+import { AsyncDataSource, isDataSource, RawDataSource } from "./prelude";
 import { ArrayDatasource } from "./array";
 import { ObjectDatasource } from "./object";
 
@@ -16,37 +16,47 @@ export { BiPredicate } from "./internals";
 
 /**
  * Transforms a value into a datasource
- * @param value 
- * @param args 
- * @returns 
+ * @param value
+ * @param args
+ * @returns
  */
-export const datasource = (value: AnyDataSource, ...args: any[]): AsyncDataSource<AnyObject> => {
+export const datasource = <S, T>(
+  value: RawDataSource<S>,
+  ...args: any[]
+): AsyncDataSource<T | Element> => {
   if (isDataSource(value)) {
-    return value as AsyncDataSource<AnyObject>;
-  } else if (isParentNode(value)) {
-    return new DocumentDatasource(value, args[0] ?? "*");
+    return value as AsyncDataSource<T>;
   } else if (Array.isArray(value)) {
-    return new ArrayDatasource(value, ...args);
+    return new ArrayDatasource<T>(value, ...args);
   } else if (isString(value)) {
-    return DocumentDatasource.fromString(value) ?? new DocumentDatasource(document, "*");
+    return (DocumentDatasource.fromString<Element>(value) ??
+      new DocumentDatasource<Element>(document, "*"));
+  } else if (isParentNode(value)) {
+    return new DocumentDatasource<Element>(value, args[0] ?? "*");
+  } else if (isObjectLike(value)) {
+    return new ObjectDatasource<T>(value as unknown as T, ...args);
   } else {
-    return new ObjectDatasource(value, ...args);
+    // Whatever mate
+    return value as AsyncDataSource<T>;
   }
-}
+};
 
 export class DatasourceRepository {
-  private sources: { alias: string | null, source: AsyncDataSource<unknown> }[] = [];
+  private sources: {
+    alias: string | null;
+    source: AsyncDataSource<unknown>;
+  }[] = [];
 
   public add<T>(source: AsyncDataSource<T>): void;
   public add<T>(source: AsyncDataSource<T>, alias?: string): void {
     this.sources.push({
       alias: alias ?? null,
-      source: datasource(source)
+      source: datasource(source),
     });
   }
 
   public get(alias: string): AsyncDataSource<unknown> | undefined {
-    return this.sources.find(e => e.alias === alias)?.source;
+    return this.sources.find((e) => e.alias === alias)?.source;
   }
 
   public isEmpty(): boolean {
@@ -54,7 +64,7 @@ export class DatasourceRepository {
   }
 
   public entries(): AsyncDataSource<unknown>[] {
-    return this.sources.map(e => e.source);
+    return this.sources.map((e) => e.source);
   }
 
   public merge(): AsyncDataSource<unknown>[] {

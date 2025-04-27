@@ -8,7 +8,7 @@ export * from "./builtin";
 export type QueryFilterPredicate = <T>(el: T) => boolean;
 
 /**
- * An async predicate applied to an `Element`
+ * An async predicate applied to a `T`
  */
 export type QueryFilterPredicateAsync = <T>(el: T) => Promise<boolean>;
 

@@ -3,7 +3,7 @@ import { QueryFilterProtocol } from "../filter";
 import { AnyObject, AsyncDataSource } from "./prelude";
 import { project } from "./internals";
 
-export class ArrayDatasource<T, K extends keyof T> implements AsyncDataSource<Pick<T, K>> {
+export class ArrayDatasource<T, U extends keyof T = keyof T> implements AsyncDataSource<T, U> {
   constructor(private source: AnyObject[], ..._args: any[]) {}
 
   __typeId(): string {
@@ -12,17 +12,17 @@ export class ArrayDatasource<T, K extends keyof T> implements AsyncDataSource<Pi
 
   async entries(
     filter?: QueryFilterProtocol,
-    projection?: Array<K>): Promise<Iterable<Pick<T, K>>> {
+    projection?: Array<U>): Promise<Iterable<Pick<T, U>>> {
         
-    const filteredElements: Pick<T, K>[] = [];
+    const filteredElements: Pick<T, U>[] = [];
     for (let index = 0; index < this.source.length; index++) {
       const element = this.source[index];
       if (!isUndefined(filter)) {
         if (await filter.apply(element)) {
-          filteredElements.push(project(element, projection) as Pick<T, K>);
+          filteredElements.push(project(element, projection) as Pick<T, U>);
         }
       } else {
-        filteredElements.push(project(element, projection) as Pick<T, K>);
+        filteredElements.push(project(element, projection) as Pick<T, U>);
       }
     }
 
