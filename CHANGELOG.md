@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.1](https://github.com/sixpounder/jql/compare/v0.4.0...v0.4.1) (2025-11-21)
+
+
+### Bug Fixes
+
+* broken dependencies ([b30b094](https://github.com/sixpounder/jql/commit/b30b094715073adec8fa67b69f5c10fb0b1a65ef))
+
 ## 0.4.0 (2025-11-21)
 
 
