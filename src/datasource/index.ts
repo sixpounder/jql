@@ -12,7 +12,7 @@ export * from "./object";
 export * from "./operators";
 export * from "./joined";
 
-export { BiPredicate } from "./internals";
+export { type BiPredicate } from "./internals";
 
 /**
  * Transforms a value into a datasource
