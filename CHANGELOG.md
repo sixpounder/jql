@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.5.0](https://github.com/sixpounder/jql/compare/v0.4.2...v0.5.0) (2026-08-14)
+
+
+### Features
+
+* **ci:** add 22.x and 24.x to node build matrix ([1e4d1f8](https://github.com/sixpounder/jql/commit/1e4d1f8311eb7b525247839f48497177b42b9488))
+* migrate to rolldown ([7e2cce0](https://github.com/sixpounder/jql/commit/7e2cce01297c0099864a1ffe202cc661037b4c97))
+* remove support for node 16 ([cf32a7b](https://github.com/sixpounder/jql/commit/cf32a7bd6a78ae4abcded55c96b999883b33f0a7))
+* update dev stack ([efd29a1](https://github.com/sixpounder/jql/commit/efd29a1763858560897981756c432ad489795f9c))
+
 ### [0.4.2](https://github.com/sixpounder/jql/compare/v0.4.1...v0.4.2) (2025-11-21)
 
 ### [0.4.1](https://github.com/sixpounder/jql/compare/v0.4.0...v0.4.1) (2025-11-21)
