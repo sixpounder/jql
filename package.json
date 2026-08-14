@@ -30,8 +30,8 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs",
-    "build:mjs": "rolldown ./src/mod.ts --sourcemap --bundle --tree-shaking=true --format=esm --minify --file=dist/jql.mjs",
-    "build:cjs": "rolldown ./src/mod.ts --sourcemap --bundle --tree-shaking=true --format=cjs --minify --file=dist/jql.cjs",
+    "build:mjs": "rolldown ./src/mod.ts --sourcemap --format=esm --minify --file=dist/jql.mjs",
+    "build:cjs": "rolldown ./src/mod.ts --sourcemap --format=cjs --minify --file=dist/jql.cjs",
     "build:docs": "typedoc",
     "lint": "eslint --fix",
     "link": "npm run build && cd dist && npm link",
