@@ -43,8 +43,8 @@ export class Projection<TProject extends string | symbol> {
    * @param sources - Any number of data sources to include in the query
    * @returns - the query with the data source(s) added
    */
-  public from(...sources: AnyDataSource[]): FilterableQuery<TProject> {
-    return new FilterableQuery<TProject>(this, sources);
+  public from<TDataSource>(...sources: AnyDataSource[]): QueryWithDataSource<TDataSource, TProject> {
+    return new QueryWithDataSource<typeof sources, TProject>(this, sources);
   }
 
   public get projection(): TProject[] | null {
@@ -61,7 +61,7 @@ export class Projection<TProject extends string | symbol> {
  * Represents a query that has data sources attached to it, and is now filterable,
  * sortable, runnable etc...
  */
-export class FilterableQuery<TProject extends string | symbol> implements Executable<TProject> {
+export class QueryWithDataSource<TDataSource, TProject extends string | symbol> implements Executable<TProject> {
   private datasourceRepository: DatasourceRepository = new DatasourceRepository();
   private resultsLimit = 0;
   private resultsOffset = 0;
@@ -80,7 +80,7 @@ export class FilterableQuery<TProject extends string | symbol> implements Execut
    * @param conditions - the filters to append to the filter list
    * @returns - The query with the filters appended
    */
-  public where(...conditions: AnyFilter[]): FilterableQuery<TProject> {
+  public where(...conditions: AnyFilter[]): QueryWithDataSource<TDataSource, TProject> {
     if (conditions.length === 1 && isPredicate(conditions[0])) {
       this._filter = filter(conditions[0])
     } else {
@@ -95,7 +95,7 @@ export class FilterableQuery<TProject extends string | symbol> implements Execut
    * @param n - the number of entries to limit to
    * @returns - the query with a limit set
    */
-  public limit(n: number): FilterableQuery<TProject> {
+  public limit(n: number): QueryWithDataSource<TDataSource, TProject> {
     this.resultsLimit = n;
     return this;
   }
@@ -105,7 +105,7 @@ export class FilterableQuery<TProject extends string | symbol> implements Execut
    * @param n - the offset index
    * @returns - the query with an offset set
    */
-  public offset(n: number): FilterableQuery<TProject> {
+  public offset(n: number): QueryWithDataSource<TDataSource, TProject> {
     this.resultsOffset = n;
     return this;
   }
@@ -116,7 +116,7 @@ export class FilterableQuery<TProject extends string | symbol> implements Execut
    * @param direction - The direction of the sort. The default is `SortDirection.Ascending`
    */
   public orderBy(field: string, direction: SortDirection = SortDirection.Ascending)
-    : FilterableQuery<TProject> {
+    : QueryWithDataSource<TDataSource, TProject> {
     this.sortRules.push({
       field,
       direction
