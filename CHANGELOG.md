@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.6.2](https://github.com/sixpounder/jql/compare/v0.5.3...v0.6.2) (2026-08-16)
+
+
+### Features
+
+* add more dev tools ([c276c9d](https://github.com/sixpounder/jql/commit/c276c9da9efc5ac3ddbc157f3231fe6f7d155da0))
+* **ci:** add 22.x and 24.x to node build matrix ([7d1de0a](https://github.com/sixpounder/jql/commit/7d1de0a8372312a163d1a7bf0dd4dd9e5bffcdf0))
+* migrate to rolldown ([cd17e04](https://github.com/sixpounder/jql/commit/cd17e04abfb1c7bbf0cfd1c11130f7dee38d784e))
+* refactor types for better typing ([655e0b0](https://github.com/sixpounder/jql/commit/655e0b04ac648c031e1460a13d16285842d9cef3))
+* remove support for node 16 ([3c47e38](https://github.com/sixpounder/jql/commit/3c47e38a3ff2a3488cca3feb0138c2d55033bf47))
+* update dev stack ([85d994e](https://github.com/sixpounder/jql/commit/85d994ee1de3c941a579ad4e7524d99b34915a81))
+
+
+### Bug Fixes
+
+* broken dependencies ([79351b0](https://github.com/sixpounder/jql/commit/79351b05dadfad9c214649979e912b03a5204862))
+* update vulnerable dependencies ([78a9766](https://github.com/sixpounder/jql/commit/78a9766136a8cb828947f76ce11d142ca69e4e53))
+
 ### [0.6.1](https://github.com/sixpounder/jql/compare/v0.6.0...v0.6.1) (2026-08-16)
 
 ## [0.6.0](https://github.com/sixpounder/jql/compare/v0.5.3...v0.6.0) (2026-08-16)
