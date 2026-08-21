@@ -9,7 +9,7 @@ import {
   isPredicate,
   AnyFilter
 } from "./filter";
-import { filter as projectedObject } from "lodash-es";
+import { isUndefined, filter as projectedObject } from "lodash-es";
 import { SortDirection, SortRule, sort } from "./sort";
 import { isNull, uniq } from "lodash-es";
 
@@ -67,6 +67,7 @@ export class QueryWithDataSource<TDataSource, TProject extends string | symbol> 
   private resultsOffset = 0;
   private sortRules: SortRule[] = [];
   private _filter: QueryFilterProtocol = identity;
+  private _having: QueryFilterProtocol | undefined;
 
   constructor(private parent: Projection<TProject>, sources: RawDataSource<unknown>[]) {
     for (const source of sources) {
@@ -82,9 +83,27 @@ export class QueryWithDataSource<TDataSource, TProject extends string | symbol> 
    */
   public where(...conditions: AnyFilter[]): QueryWithDataSource<TDataSource, TProject> {
     if (conditions.length === 1 && isPredicate(conditions[0])) {
-      this._filter = filter(conditions[0])
+      this._filter = filter(conditions[0]);
     } else {
       this._filter = and(...conditions);
+    }
+
+    return this;
+  }
+
+  /**
+   * Adds `having` filters for this query. They differ from `where` filters
+   * in that they run on the final result before it is returned and not on the
+   * whole datasource.
+   * 
+   * @param conditions - the filters to append
+   * @returns - The query with the filters appended
+   */
+  public having(...conditions: AnyFilter[]): QueryWithDataSource<TDataSource, TProject> {
+    if (conditions.length === 1 && isPredicate(conditions[0])) {
+      this._having = filter(conditions[0]);
+    } else {
+      this._having = and(...conditions);
     }
 
     return this;
@@ -125,8 +144,12 @@ export class QueryWithDataSource<TDataSource, TProject extends string | symbol> 
     return this;
   }
 
-  public get filter(): QueryFilterProtocol {
+  public get whereFilter(): QueryFilterProtocol {
     return this._filter;
+  }
+
+  public get havingFilter(): QueryFilterProtocol | undefined {
+    return this._having;
   }
 
   /**
@@ -150,7 +173,7 @@ export class QueryWithDataSource<TDataSource, TProject extends string | symbol> 
 
     // Extraction and filtering
     for (const source of datasources) {
-      for (const node of await source.entries(this.filter)) {
+      for (const node of await source.entries(this.whereFilter)) {
         unprojectedNodes.push(node as AnyObject);
       }
     }
@@ -175,7 +198,20 @@ export class QueryWithDataSource<TDataSource, TProject extends string | symbol> 
       node => project(node, this.parent.projection) as O
     );
 
-    return projectedNodes;
+    // Having
+    let filteredProjectedNodes;
+    if (!isUndefined(this.havingFilter)) {
+      filteredProjectedNodes = [];
+      for (const element of projectedNodes) {
+        if (await this.havingFilter?.apply(element)) {
+          filteredProjectedNodes.push(element);
+        }
+      }
+    } else {
+      filteredProjectedNodes = projectedNodes;
+    }
+
+    return filteredProjectedNodes;
   }
 
 
