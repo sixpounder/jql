@@ -1,4 +1,13 @@
-import { compact, get, hasIn, isEmpty, isNil, isRegExp, isString, isUndefined } from "lodash-es";
+import {
+  compact,
+  get,
+  hasIn,
+  isEmpty,
+  isNil,
+  isRegExp,
+  isString,
+  isUndefined,
+} from "lodash-es";
 import { isElement } from "../../inspection";
 
 const TAGNAME_PROP = "tagName";
@@ -7,13 +16,13 @@ const TAGNAME_PROP = "tagName";
  * Returns a predicate that filters based on the `tagName` property of an object
  * @param expected - the tag name(s) to match the `tagName` against
  * @returns - A predicate that returns `true` if at least one `expected` name matches the element `tagName`
- * 
+ *
  * @example
  * ```typescript
  * select().from("document").where(tagName("div")).run() // [{ tagName: "DIV", ... }, ...]
  * ```
  */
-export const tagName = (...expected: string[]): <T>(el: T) => boolean => {
+export const tagName = (...expected: string[]): (<T>(el: T) => boolean) => {
   return (el) => {
     const compactExpected = compact(expected);
     if (isNil(compactExpected) || isEmpty(compactExpected)) {
@@ -25,29 +34,31 @@ export const tagName = (...expected: string[]): <T>(el: T) => boolean => {
     if (isElement(el) || hasIn(el, TAGNAME_PROP)) {
       const prop = get(el, TAGNAME_PROP);
       if (isString(prop)) {
-        return !isUndefined(compactExpected.find(t => t.toLowerCase() === prop.toLowerCase()));
+        return !isUndefined(
+          compactExpected.find((t) => t.toLowerCase() === prop.toLowerCase()),
+        );
       } else {
         return false;
       }
     } else {
       return false;
     }
-  }
-}
+  };
+};
 
 /**
  * Returns a predicate that filter on an `Element` having a specific class in its `classlist`
  * @param klass - the class to find
  * @returns - The predicate
- * 
+ *
  * @example
  * ```typescript
  * select().from("document").where(hasClass("foo")).run() // [{ tagName: "DIV", ... }, ...]
- * 
+ *
  * select().from("document").where(hasClass("foo", "bar")).run() // [{ tagName: "DIV", ... }, ...]
  * ```
  */
-export const hasClass = (...klass: string[]): (el: any) => boolean => {
+export const hasClass = (...klass: string[]): ((el: any) => boolean) => {
   return (el) => {
     if (!isElement(el)) {
       return false;
@@ -56,9 +67,9 @@ export const hasClass = (...klass: string[]): (el: any) => boolean => {
     return klass.reduce((acc, currentClass) => {
       acc = acc && el.classList.contains(currentClass);
       return acc;
-    }, true)
-  }
-}
+    }, true);
+  };
+};
 
 /**
  * Returns a predicate that filter on an `Element` having a specific attribute in its attribute list. If a value
@@ -68,22 +79,22 @@ export const hasClass = (...klass: string[]): (el: any) => boolean => {
  * @param val - The attribute value to match against
  * @returns The built predicate. Note that the returned predicate only works on DOM elements. If the provided input
  * is not an `Element` this will always evaluate to `false`.
- * 
+ *
  * @example
  * ```typescript
- * 
+ *
  * select().from("document").where(attr("src")).run()
  * // [{ tagName: "IMG", src: "***", ... }]
- * 
+ *
  * select()
  *   .from("document")
  *   .where(attr("src", "https://some.image.url"))
  *   .run()
  * // [{ tagName: "IMG", src: ""https://some.image.url"", ... }]
- * 
+ *
  * ```
  */
-export const attr = <V>(attr: string, val?: V): (el: any) => boolean => {
+export const attr = <V>(attr: string, val?: V): ((el: any) => boolean) => {
   return (el) => {
     if (!isElement(el)) {
       return false;
@@ -93,41 +104,44 @@ export const attr = <V>(attr: string, val?: V): (el: any) => boolean => {
       ? el.hasAttribute(attr)
       : el.attributes.getNamedItem(attr)?.value === val || false;
   };
-}
+};
 
 /**
  * A predicate returning true if an object has a property with a given `name` and, optionally, having a specific `value`
  * @param name - The name of the property
  * @param expected - The value of the property (optional)
  * @returns - The predicate
- * 
+ *
  * @example
  * ```typescript
  * select().from({ a: 1, b: 2}).where(prop("a")).run() // [{ a: 1, a: 2 }]
- * 
+ *
  * select().from({ a: 1, b: 2}).where(prop("a", 1)).run() // [{ a: 1, a: 2 }]
- * 
+ *
  * select().from({ a: 1, b: 2}).where(prop("a", "hello")).run() // []
- * 
+ *
  * select().from({ a: 1, b: 2}).where(prop("c")).run() // []
- * 
+ *
  * select().from({ name: "Some value" }).where(prop("name", /^Some/)).run() // [{ name: "Some value" }]
  * ```
  */
-export const prop = <V>(name: string, expected?: V): <T>(el: T) => boolean => {
+export const prop = <V>(
+  name: string,
+  expected?: V,
+): (<T>(el: T) => boolean) => {
   return (el) => {
     if (isNil(expected)) {
       return hasIn(el, name);
     } else {
       const value = get(el, name, null);
       if (isRegExp(expected) && isString(value)) {
-        return expected.test(value);
+        return new RegExp(expected.source, expected.flags).test(value);
       } else {
         return value === expected;
       }
     }
-  }
-}
+  };
+};
 
 /**
  * Asserts that a property with name `name` is present in the element being evaluated and has a null-ish value
@@ -140,11 +154,11 @@ export const prop = <V>(name: string, expected?: V): <T>(el: T) => boolean => {
  * // result -> [{ a: 1 }, { a: 2 }]
  * ```
  */
-export const isNull = (name: string): (el: any) => boolean => {
+export const isNull = (name: string): ((el: any) => boolean) => {
   return (el) => {
     return isNil(get(el, name));
-  }
-}
+  };
+};
 
 /**
  * Asserts that a property with name `name` is present in the element being evaluated and has a non null-ish value
@@ -157,8 +171,8 @@ export const isNull = (name: string): (el: any) => boolean => {
  * // result -> [{ a: 1 }, { a: 2 }]
  * ```
  */
-export const notNull = (name: string): (el: any) => boolean => {
+export const notNull = (name: string): ((el: any) => boolean) => {
   return (el) => {
     return !isNil(get(el, name));
-  }
-}
+  };
+};

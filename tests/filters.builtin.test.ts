@@ -19,25 +19,23 @@ document.body.appendChild(someOtherDiv);
 describe("Testing hasClass filter", () => {
   test("contract", () => {
     expect(hasClass("leet")({})).toBe(false);
-    expect(hasClass("leet")(document.querySelector("div.leet") as Element)).toBe(true);
+    expect(
+      hasClass("leet")(document.querySelector("div.leet") as Element),
+    ).toBe(true);
     expect(hasClass("leet")(document.body)).toBe(false);
-    expect(hasClass("foo")("My name is Inigo Montoya" as unknown as Element)).toBe(false);
+    expect(
+      hasClass("foo")("My name is Inigo Montoya" as unknown as Element),
+    ).toBe(false);
     expect(hasClass("foo")(0 as unknown as Element)).toBe(false);
     expect(hasClass("foo")({} as Element)).toBe(false);
   });
 
   test("query", async () => {
-
     const queryResult = await select("div")
       .from(document)
-      .where(
-        and(
-          not(hasClass("wolf")),
-          hasClass("sheep")
-        )
-      )
+      .where(and(not(hasClass("wolf")), hasClass("sheep")))
       .run();
-        
+
     expect(queryResult).toBeInstanceOf(Array);
     expect(queryResult).toHaveLength(1);
   });
@@ -48,29 +46,33 @@ describe("Testing attr filter", () => {
     expect(attr("data-fold")({})).toBe(false);
     expect(attr("data-fold", "anyValue")({})).toBe(false);
 
-    expect(attr("data-fold")(document.querySelector("div.leet") as Element)).toBe(true);
-    expect(attr("data-fold", "2")(document.querySelector("div.leet") as Element)).toBe(false);
-    expect(attr("non-existent-attr")(document.querySelector("div.leet") as Element)).toBe(false);
+    expect(
+      attr("data-fold")(document.querySelector("div.leet") as Element),
+    ).toBe(true);
+    expect(
+      attr("data-fold", "2")(document.querySelector("div.leet") as Element),
+    ).toBe(false);
+    expect(
+      attr("non-existent-attr")(document.querySelector("div.leet") as Element),
+    ).toBe(false);
 
-    expect(attr("data-fold", "1")(document.querySelector("div.leet") as Element)).toBe(true);
+    expect(
+      attr("data-fold", "1")(document.querySelector("div.leet") as Element),
+    ).toBe(true);
     expect(attr("data-fold", "1")(document.body)).toBe(false);
-    expect(attr("data-fold", "1")("My name is Inigo Montoya" as unknown as Element)).toBe(false);
+    expect(
+      attr("data-fold", "1")("My name is Inigo Montoya" as unknown as Element),
+    ).toBe(false);
     expect(attr("data-fold", "1")(0 as unknown as Element)).toBe(false);
     expect(attr("data-fold", "1")({} as Element)).toBe(false);
   });
 
   test("query", async () => {
-
     const queryResult = await select("*")
       .from(document)
-      .where(
-        and(
-          attr("data-fold", "1"),
-          not(attr("data-fold", "32"))
-        )
-      )
+      .where(and(attr("data-fold", "1"), not(attr("data-fold", "32"))))
       .run();
-        
+
     expect(queryResult).toBeInstanceOf(Array);
     expect(queryResult).toHaveLength(1);
 
@@ -78,7 +80,7 @@ describe("Testing attr filter", () => {
       .from(document)
       .where(attr("data-fold"))
       .run();
-        
+
     expect(queryResult2).toBeInstanceOf(Array);
     expect(queryResult2).toHaveLength(2);
   });
@@ -89,27 +91,29 @@ describe("Testing tagName filter", () => {
     expect(tagName("div")({})).toBe(false);
     expect(tagName("div")({ tagName: 1 })).toBe(false);
 
-    expect(tagName(null as any)(document.querySelector("div.leet") as Element)).toBe(false);
-    expect(tagName()(document.querySelector("div.leet") as Element)).toBe(false);
-    expect(tagName("div")(document.querySelector("div.leet") as Element)).toBe(true);
+    expect(
+      tagName(null as any)(document.querySelector("div.leet") as Element),
+    ).toBe(false);
+    expect(tagName()(document.querySelector("div.leet") as Element)).toBe(
+      false,
+    );
+    expect(tagName("div")(document.querySelector("div.leet") as Element)).toBe(
+      true,
+    );
     expect(tagName("a")(document.body)).toBe(false);
-    expect(tagName("a")("My name is Inigo Montoya" as unknown as Element)).toBe(false);
+    expect(tagName("a")("My name is Inigo Montoya" as unknown as Element)).toBe(
+      false,
+    );
     expect(tagName("a")(0 as unknown as Element)).toBe(false);
     expect(tagName("a")({} as Element)).toBe(false);
   });
 
   test("query", async () => {
-
     const queryResult = await select("*")
       .from(document)
-      .where(
-        and(
-          tagName("div"),
-          not(tagName("body"))
-        )
-      )
+      .where(and(tagName("div"), not(tagName("body"))))
       .run();
-        
+
     expect(queryResult).toBeInstanceOf(Array);
     expect(queryResult).toHaveLength(2);
   });
@@ -133,5 +137,18 @@ describe("Testing prop filter", () => {
 
     expect(prop("p1", /^t.*t$/)(testObject)).toBe(true);
     expect(prop("p1", /^Inigo montoya$/)(testObject)).toBe(false);
+  });
+
+  test("regexps", async () => {
+    const testCollection = [
+      { name: "obj1" },
+      { name: "obj2" },
+      { name: "obj3" },
+      { name: "obj4" },
+    ];
+
+    expect(
+      await select().from(testCollection).where(prop("name", /^obj/g)).run(),
+    ).toHaveLength(4);
   });
 });
