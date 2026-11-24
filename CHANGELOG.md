@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.7.2](https://github.com/sixpounder/jql/compare/v0.7.1...v0.7.2) (2026-11-24)
+
+
+### Bug Fixes
+
+* **builtin/prop:** do not advance lastIndex on regexes ([69c7c05](https://github.com/sixpounder/jql/commit/69c7c05d0969e64c955889b0d596f5fa9e778c7b))
+
 ### [0.7.1](https://github.com/sixpounder/jql/compare/v0.7.0...v0.7.1) (2026-08-21)
 
 ## [0.7.0](https://github.com/sixpounder/jql/compare/v0.6.2...v0.7.0) (2026-08-21)
