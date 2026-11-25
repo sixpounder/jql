@@ -1,4 +1,4 @@
-import { has } from "lodash";
+import { has } from "lodash-es";
 import { ArrayDatasource, ObjectDatasource, innerJoin } from "../src/datasource";
 import { AsyncDataSource } from "../src/datasource/prelude";
 import { select } from "../src/query";

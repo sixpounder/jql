@@ -28,6 +28,8 @@
       "default": "./dist/jql.mjs"
     }
   },
+  "main": "./dist/jql.cjs",
+  "module": "./dist/jql.mjs",
   "scripts": {
     "build": "rimraf ./dist && tsc && npm run build:mjs && npm run build:cjs",
     "build:mjs": "rolldown ./src/mod.ts --sourcemap --format=esm --minify --file=dist/jql.mjs",
@@ -52,7 +54,6 @@
     "@eslint/js": "^9.39.1",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^21.1.5",
-    "@types/lodash": "^4.17.5",
     "@types/lodash-es": "^4.17.12",
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.67.0",
@@ -64,7 +65,6 @@
     "jsdom": "^22.1.0",
     "jsr": "^0.13.1",
     "lint-staged": "^16.2.7",
-    "lodash": "^4.17.21",
     "rimraf": "^6.1.2",
     "rolldown": "^1.2.4",
     "standard-version": "^9.5.0",
@@ -74,7 +74,7 @@
     "typescript-eslint": "^8.67.0"
   },
   "dependencies": {
-    "lodash-es": "^4.17.21"
+    "lodash-es": "^4.18.1"
   },
   "files": [
     "dist/**",
