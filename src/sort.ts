@@ -1,4 +1,4 @@
-import { sortBy } from "lodash-es";
+import { sortBy } from "es-toolkit/compat";
 
 /**
  * Defines ordering relation between two entities

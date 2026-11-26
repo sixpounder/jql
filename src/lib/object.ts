@@ -1,4 +1,4 @@
-import { has, keys } from "lodash-es";
+import { has, keys } from "es-toolkit/compat";
 
 export type Intersected<A, B> = {
     [K in keyof A & keyof B]: A[K] extends B[K] ? A[K] : never

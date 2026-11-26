@@ -1,4 +1,4 @@
-import { clone } from "lodash-es";
+import { clone } from "es-toolkit";
 import { QueryFilterProtocol } from "../filter";
 import { BiPredicate, cartesian } from "./internals";
 import { AsyncDataSource, joinIdentity } from "./prelude";

@@ -1,4 +1,4 @@
-import { hasIn } from "lodash-es";
+import { hasIn } from "es-toolkit/compat";
 import { QueryFilterProtocol } from "../filter";
 
 /**

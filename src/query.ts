@@ -9,9 +9,9 @@ import {
   isPredicate,
   AnyFilter
 } from "./filter";
-import { isUndefined, filter as projectedObject } from "lodash-es";
+import { isUndefined, isNull, uniq } from "es-toolkit";
+import { filter as projectedObject } from "es-toolkit/compat"
 import { SortDirection, SortRule, sort } from "./sort";
-import { isNull, uniq } from "lodash-es";
 
 export enum FilterChainType {
     Intersection,

@@ -1,9 +1,10 @@
-import { isObjectLike, isString } from "lodash-es";
+import { isString } from "es-toolkit";
 import { isParentNode } from "../inspection";
 import { DocumentDatasource } from "./dom";
 import { AsyncDataSource, isDataSource, RawDataSource } from "./prelude";
 import { ArrayDatasource } from "./array";
 import { ObjectDatasource } from "./object";
+import { isObjectLike } from "es-toolkit/compat";
 
 export * from "./prelude";
 export * from "./array";

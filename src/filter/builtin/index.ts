@@ -1,13 +1,11 @@
 import {
   compact,
-  get,
-  hasIn,
-  isEmpty,
   isNil,
   isRegExp,
   isString,
   isUndefined,
-} from "lodash-es";
+} from "es-toolkit";
+import { get, hasIn, isEmpty, property} from "es-toolkit/compat"
 import { isElement } from "../../inspection";
 
 const TAGNAME_PROP = "tagName";
@@ -32,11 +30,10 @@ export const tagName = (...expected: string[]): (<T>(el: T) => boolean) => {
     // Check if el is an `Element` because that's faster than checking for own or
     // inherited properties, only do that is that's necessary
     if (isElement(el) || hasIn(el, TAGNAME_PROP)) {
-      const prop = get(el, TAGNAME_PROP);
+      const getTagName = property(TAGNAME_PROP);
+      const prop = getTagName(el);
       if (isString(prop)) {
-        return !isUndefined(
-          compactExpected.find((t) => t.toLowerCase() === prop.toLowerCase()),
-        );
+        return !isUndefined(compactExpected.find((t) => t.toLowerCase() === prop.toLowerCase()));
       } else {
         return false;
       }

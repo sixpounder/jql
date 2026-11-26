@@ -1,4 +1,4 @@
-import { has } from "lodash-es";
+import { has } from "es-toolkit/compat";
 import { ArrayDatasource, leftJoin } from "../src/datasource";
 import { AsyncDataSource } from "../src/datasource/prelude";
 import { select } from "../src/query";

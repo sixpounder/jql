@@ -1,5 +1,6 @@
-import { get, isEmpty, isNull, isUndefined, set } from "lodash-es";
+import { isNull, isUndefined } from "es-toolkit";
 import { AnyObject, joinIdentity } from "./prelude";
+import { get, isEmpty, set } from "es-toolkit/compat";
 
 /**
  * A predicate that consumes two inputs
